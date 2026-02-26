@@ -20,11 +20,60 @@
             <a href="#servicos">Serviços</a>
             <a href="#qualidade">Qualidade</a>
             <a href="#processo">Processo</a>
-            <a href="#contato" class="cta-mini">Começar</a>
+            <a href="#" id="login-trigger" class="cta-mini">Login</a>
         </nav>
     </header>
 
     <main>
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="modal-overlay">
+            <div class="modal-content glass-card">
+                <button id="close-modal" class="close-btn">&times;</button>
+
+                <div id="login-view">
+                    <h2>Bem-vindo de volta</h2>
+                    <p>Entre com sua conta Psyzon</p>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <input type="email" id="login-email" placeholder="E-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="login-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Entrar</button>
+                    </form>
+                    <div class="divider">ou</div>
+                    <button id="google-login" class="btn btn-secondary w-full google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        Entrar com Google
+                    </button>
+                    <p class="switch-view">Não tem uma conta? <a href="#" id="to-signup">Criar conta</a></p>
+                </div>
+
+                <div id="signup-view" style="display: none;">
+                    <h2>Criar conta</h2>
+                    <p>Cadastre-se para personalizar seus designs</p>
+                    <form id="signup-form">
+                        <div class="input-group">
+                            <input type="text" id="signup-name" placeholder="Nome completo" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="signup-email" placeholder="E-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="signup-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Cadastrar</button>
+                    </form>
+                    <div class="divider">ou</div>
+                    <button id="google-signup" class="btn btn-secondary w-full google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        Cadastrar com Google
+                    </button>
+                    <p class="switch-view">Já tem uma conta? <a href="#" id="to-login">Fazer login</a></p>
+                </div>
+            </div>
+        </div>
         <!-- Hero Section com Background Animado -->
         <section class="hero">
             <canvas id="tshirt-canvas"></canvas>
@@ -89,6 +138,10 @@
             </div>
         </section>
     </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script src="js/main.js"></script>
 </body>

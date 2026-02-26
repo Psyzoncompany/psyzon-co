@@ -1,7 +1,107 @@
 document.addEventListener('DOMContentLoaded', () => {
     initAnimation();
     initScrollAnimations();
+    initAuthModal();
+    initFirebase();
 });
+
+// Firebase Configuration (Request: User should fill these with their actual project keys)
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "site-psyzon.firebaseapp.com",
+    projectId: "site-psyzon",
+    storageBucket: "site-psyzon.appspot.com",
+    messagingSenderId: "782092420102",
+    appId: "YOUR_APP_ID"
+};
+
+function initFirebase() {
+    if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase Initialized");
+    } else {
+        console.error("Firebase SDK not loaded");
+    }
+}
+
+function initAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    const loginTrigger = document.getElementById('login-trigger');
+    const closeBtn = document.getElementById('close-modal');
+    const toSignup = document.getElementById('to-signup');
+    const toLogin = document.getElementById('to-login');
+    const loginView = document.getElementById('login-view');
+    const signupView = document.getElementById('signup-view');
+
+    if (!modal || !loginTrigger) return;
+
+    // Show/Hide Modal
+    loginTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('active');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Switch Views
+    toSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.style.display = 'none';
+        signupView.style.display = 'block';
+    });
+
+    toLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        signupView.style.display = 'none';
+        loginView.style.display = 'block';
+    });
+
+    // Auth Logic
+    const googleBtns = document.querySelectorAll('#google-login, #google-signup');
+    googleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then(result => {
+                    console.log("Logged in with Google:", result.user.displayName);
+                    modal.classList.remove('active');
+                })
+                .catch(error => {
+                    alert("Erro ao entrar com Google: " + error.message);
+                });
+        });
+    });
+
+    // Email Login
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                modal.classList.remove('active');
+            })
+            .catch(err => alert("Erro ao fazer login: " + err.message));
+    });
+
+    // Email Signup
+    document.getElementById('signup-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value;
+        const pass = document.getElementById('signup-password').value;
+        firebase.auth().createUserWithEmailAndPassword(email, pass)
+            .then(() => {
+                modal.classList.remove('active');
+            })
+            .catch(err => alert("Erro ao criar conta: " + err.message));
+    });
+}
 
 /**
  * Image Sequence Animation (Hero Section)

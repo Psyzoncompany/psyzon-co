@@ -278,6 +278,124 @@ body {
     }
 }
 
+/* Modal Auth Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    padding: 60px 40px 40px;
+    text-align: center;
+    border-radius: 32px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.modal-content h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.modal-content p {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--accent);
+    background: white;
+}
+
+.w-full {
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.divider {
+    margin: 25px 0;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+    margin: 0 15px;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 1rem;
+}
+
+.google-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.switch-view {
+    margin-top: 25px !important;
+    font-size: 0.9rem;
+}
+
+.switch-view a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
 /* Mobile Adaptability */
 @media (max-width: 1024px) {
     .hero-content h1 {
