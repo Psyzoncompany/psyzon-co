@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psyzon | Estúdio de Moda Premium</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Header Glassmorphism -->
+    <header class="glass-header">
+        <div class="logo">PSYZON</div>
+        <nav class="nav-links">
+            <a href="#servicos">Serviços</a>
+            <a href="#qualidade">Qualidade</a>
+            <a href="#processo">Processo</a>
+            <a href="#contato" class="cta-mini">Começar</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section com Background Animado -->
+        <section class="hero">
+            <canvas id="tshirt-canvas"></canvas>
+            <div class="hero-overlay"></div>
+
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1>Moda Streetwear Premium.</h1>
+                    <p>Estúdio de vestuário personalizado focado em design minimalista e qualidade têxtil superior.</p>
+                    <div class="hero-actions">
+                        <a href="#personalizar" class="btn btn-primary">Criar Design</a>
+                        <a href="#colecao" class="btn btn-secondary">Ver Coleção</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards de Características -->
+        <section class="features" id="servicos">
+            <div class="container">
+                <div class="glass-grid">
+                    <div class="glass-card fade-in">
+                        <div class="card-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                </polygon>
+                            </svg>
+                        </div>
+                        <h3>Qualidade Premium</h3>
+                        <p>Utilizamos os melhores materiais para garantir que suas peças durem e tenham um toque
+                            luxuoso.</p>
+                    </div>
+                    <div class="glass-card fade-in">
+                        <div class="card-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                                <path d="M2 2l7.5 1.5"></path>
+                                <path d="M7.6 7.6L2 2"></path>
+                            </svg>
+                        </div>
+                        <h3>Impressão Customizada</h3>
+                        <p>Nosso processo de impressão de última geração captura cada detalhe da sua visão.</p>
+                    </div>
+                    <div class="glass-card fade-in">
+                        <div class="card-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                            </svg>
+                        </div>
+                        <h3>Produção Ágil</h3>
+                        <p>Produção rápida e logística eficiente para entregar seus designs no prazo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
