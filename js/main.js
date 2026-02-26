@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Firebase Configuration (Request: User should fill these with their actual project keys)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyCJu5MqpS4oIPvmaz3tyvVbQm92CR3yYEU",
     authDomain: "site-psyzon.firebaseapp.com",
     projectId: "site-psyzon",
-    storageBucket: "site-psyzon.appspot.com",
+    storageBucket: "site-psyzon.firebasestorage.app",
     messagingSenderId: "782092420102",
-    appId: "YOUR_APP_ID"
+    appId: "1:782092420102:web:aa9822b42fad3d1a5f6f87"
 };
 
 function initFirebase() {
