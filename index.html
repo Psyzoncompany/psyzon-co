@@ -4,10 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Psyzon – Estúdio de moda streetwear premium com design minimalista e qualidade têxtil superior.">
     <title>Psyzon | Estúdio de Moda Premium</title>
-    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Preconnect / DNS-Prefetch for external origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
+
+    <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -45,7 +51,7 @@
                     </form>
                     <div class="divider">ou</div>
                     <button id="google-login" class="btn btn-secondary w-full google-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
                         Entrar com Google
                     </button>
                     <p class="switch-view">Não tem uma conta? <a href="#" id="to-signup">Criar conta</a></p>
@@ -68,7 +74,7 @@
                     </form>
                     <div class="divider">ou</div>
                     <button id="google-signup" class="btn btn-secondary w-full google-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
                         Cadastrar com Google
                     </button>
                     <p class="switch-view">Já tem uma conta? <a href="#" id="to-login">Fazer login</a></p>
@@ -149,13 +155,13 @@
         </section>
     </main>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <!-- Firebase SDK (defer to avoid render-blocking) -->
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
-    <script src="js/main.js"></script>
+    <script defer src="js/main.js"></script>
 </body>
 
 </html>
