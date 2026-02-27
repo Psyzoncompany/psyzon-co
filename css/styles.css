@@ -214,12 +214,12 @@ body {
     border-radius: 30px;
     box-shadow: var(--shadow);
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    will-change: transform;
 }
 
 .glass-card:hover {
     transform: translateY(-10px);
     background: rgba(255, 255, 255, 0.6);
+    will-change: transform;
 }
 
 .card-icon {
@@ -431,12 +431,12 @@ body {
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
-    will-change: transform;
 }
 
 .gallery-card:hover {
     transform: translateY(-10px);
     background: rgba(255, 255, 255, 0.6);
+    will-change: transform;
 }
 
 .gallery-card img {
