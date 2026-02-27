@@ -21,14 +21,29 @@ const firebaseConfig = {
 function initFirebase() {
     if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         console.log("Firebase Initialized");
 
         initGallery();
 
         firebase.auth().onAuthStateChanged(user => {
             const isAdmin = user && user.email === ADMIN_EMAIL;
+            const isLoggedIn = !!user;
             const fabBtn = document.getElementById('admin-upload-btn');
-            if (fabBtn) fabBtn.style.display = isAdmin ? 'flex' : 'none';
+            if (fabBtn) fabBtn.style.display = isLoggedIn ? 'flex' : 'none';
+
+            // Update login trigger to reflect auth state
+            const loginTrigger = document.getElementById('login-trigger');
+            if (loginTrigger) {
+                if (user) {
+                    const displayName = user.displayName || user.email.split('@')[0];
+                    loginTrigger.textContent = displayName;
+                    loginTrigger.dataset.logged = 'true';
+                } else {
+                    loginTrigger.textContent = 'Login';
+                    loginTrigger.dataset.logged = 'false';
+                }
+            }
 
             // Re-render gallery cards to show/hide delete buttons
             renderGalleryAdminState(isAdmin);
@@ -49,10 +64,20 @@ function initAuthModal() {
 
     if (!modal || !loginTrigger) return;
 
-    // Show/Hide Modal
+    // Show/Hide Modal or Logout
     loginTrigger.addEventListener('click', (e) => {
         e.preventDefault();
-        modal.classList.add('active');
+        if (loginTrigger.dataset.logged === 'true') {
+            if (confirm('Deseja sair da sua conta?')) {
+                firebase.auth().signOut().then(() => {
+                    console.log('User signed out');
+                }).catch(err => {
+                    alert('Erro ao sair: ' + err.message);
+                });
+            }
+        } else {
+            modal.classList.add('active');
+        }
     });
 
     closeBtn.addEventListener('click', () => {

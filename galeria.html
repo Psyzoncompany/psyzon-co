@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria | Psyzon</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Header Glassmorphism -->
+    <header class="glass-header">
+        <div class="logo"><a href="index.html" style="text-decoration:none;color:inherit;">PSYZON</a></div>
+        <nav class="nav-links">
+            <a href="index.html#servicos">Serviços</a>
+            <a href="index.html#qualidade">Qualidade</a>
+            <a href="index.html#processo">Processo</a>
+            <a href="galeria.html" class="nav-active">Galeria</a>
+            <a href="#" id="login-trigger" class="cta-mini">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="modal-overlay">
+            <div class="modal-content glass-card">
+                <button id="close-modal" class="close-btn">&times;</button>
+
+                <div id="login-view">
+                    <h2>Bem-vindo de volta</h2>
+                    <p>Entre com sua conta Psyzon</p>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <input type="email" id="login-email" placeholder="E-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="login-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Entrar</button>
+                    </form>
+                    <div class="divider">ou</div>
+                    <button id="google-login" class="btn btn-secondary w-full google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        Entrar com Google
+                    </button>
+                    <p class="switch-view">Não tem uma conta? <a href="#" id="to-signup">Criar conta</a></p>
+                </div>
+
+                <div id="signup-view" style="display: none;">
+                    <h2>Criar conta</h2>
+                    <p>Cadastre-se para personalizar seus designs</p>
+                    <form id="signup-form">
+                        <div class="input-group">
+                            <input type="text" id="signup-name" placeholder="Nome completo" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="signup-email" placeholder="E-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="signup-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Cadastrar</button>
+                    </form>
+                    <div class="divider">ou</div>
+                    <button id="google-signup" class="btn btn-secondary w-full google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                        Cadastrar com Google
+                    </button>
+                    <p class="switch-view">Já tem uma conta? <a href="#" id="to-login">Fazer login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <section class="collection-section gallery-page-section" id="galeria">
+            <div class="container">
+                <h2 class="section-title fade-in">Galeria</h2>
+                <p class="gallery-page-subtitle fade-in">Explore nossa coleção completa de peças. Faça login para adicionar suas imagens.</p>
+                <div class="gallery-grid" id="gallery-grid">
+                    <!-- Skeleton loaders shown while loading -->
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Upload Button (visible to any logged-in user) -->
+    <button id="admin-upload-btn" class="admin-fab" style="display:none;" title="Adicionar foto">＋</button>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal-overlay">
+        <div class="modal-content glass-card upload-modal-content">
+            <button id="close-upload-modal" class="close-btn">&times;</button>
+            <h2>Nova Peça</h2>
+            <p>Adicione uma nova foto à coleção</p>
+            <div id="drop-zone" class="drop-zone">
+                <span id="drop-zone-label">Arraste a foto aqui ou <u>clique para selecionar</u></span>
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                <img id="upload-preview" class="upload-preview" src="" alt="Preview" style="display:none;">
+            </div>
+            <div class="input-group" style="margin-top:20px;">
+                <input type="text" id="gallery-item-name" placeholder="Nome da peça" required>
+            </div>
+            <button id="publish-btn" class="btn btn-primary w-full">Publicar</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

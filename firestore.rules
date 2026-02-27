@@ -8,7 +8,8 @@ service cloud.firestore {
 
     match /gallery/{doc} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == 'ADMIN_EMAIL_AQUI';
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.token.email == 'ADMIN_EMAIL_AQUI';
     }
   }
 }
