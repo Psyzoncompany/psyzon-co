@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     initAnimation();
     initScrollAnimations();
+    initCardHoverAnimations();
+    initCursorBlinkAnimation();
+    initSkeletonShimmer();
     initAuthModal();
     initFirebase();
 });
@@ -77,15 +80,29 @@ function initAuthModal() {
             }
         } else {
             modal.classList.add('active');
+            anime({
+                targets: modal,
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutCubic'
+            });
         }
     });
 
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
+    function closeModal() {
+        anime({
+            targets: modal,
+            opacity: [1, 0],
+            duration: 300,
+            easing: 'easeInCubic',
+            complete: () => modal.classList.remove('active')
+        });
+    }
+
+    closeBtn.addEventListener('click', closeModal);
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('active');
+        if (e.target === modal) closeModal();
     });
 
     // Switch Views
@@ -109,7 +126,7 @@ function initAuthModal() {
             firebase.auth().signInWithPopup(provider)
                 .then(result => {
                     console.log("Logged in with Google:", result.user.displayName);
-                    modal.classList.remove('active');
+                    closeModal();
                 })
                 .catch(error => {
                     alert("Erro ao entrar com Google: " + error.message);
@@ -124,7 +141,7 @@ function initAuthModal() {
         const pass = document.getElementById('login-password').value;
         firebase.auth().signInWithEmailAndPassword(email, pass)
             .then(() => {
-                modal.classList.remove('active');
+                closeModal();
             })
             .catch(err => alert("Erro ao fazer login: " + err.message));
     });
@@ -136,7 +153,7 @@ function initAuthModal() {
         const pass = document.getElementById('signup-password').value;
         firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then(() => {
-                modal.classList.remove('active');
+                closeModal();
             })
             .catch(err => alert("Erro ao criar conta: " + err.message));
     });
@@ -251,7 +268,13 @@ async function typeHeroText() {
     await typeEffect(p, pFull, 25);
 
     await new Promise(r => setTimeout(r, 500));
-    actions.classList.add('visible');
+    anime({
+        targets: actions,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 800,
+        easing: 'easeOutCubic'
+    });
 }
 
 function typeEffect(element, text, speed) {
@@ -278,13 +301,75 @@ function initScrollAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                anime({
+                    targets: entry.target,
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    duration: 1000,
+                    easing: 'easeOutCubic'
+                });
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
     const fadeElements = document.querySelectorAll('.glass-card, .fade-in');
     fadeElements.forEach(el => observer.observe(el));
+}
+
+function initCardHoverAnimations() {
+    const cards = document.querySelectorAll('.glass-card, .gallery-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            anime({
+                targets: card,
+                translateY: -10,
+                background: 'rgba(255, 255, 255, 0.6)',
+                duration: 400,
+                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
+            });
+        });
+        card.addEventListener('mouseleave', () => {
+            anime({
+                targets: card,
+                translateY: 0,
+                background: 'rgba(255, 255, 255, 0.4)',
+                duration: 400,
+                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
+            });
+        });
+    });
+}
+
+function initCursorBlinkAnimation() {
+    const cursors = document.querySelectorAll('.typewriter-cursor::after');
+    if (cursors.length === 0) {
+        // Animate cursor blink via a style injection for the pseudo-element
+        anime({
+            targets: '.typewriter-cursor',
+            keyframes: [
+                { opacity: 1 },
+                { opacity: 0 },
+                { opacity: 1 }
+            ],
+            duration: 1000,
+            loop: true,
+            easing: 'steps(1)'
+        });
+    }
+}
+
+function initSkeletonShimmer() {
+    const skeletons = document.querySelectorAll('.gallery-skeleton');
+    if (skeletons.length > 0) {
+        anime({
+            targets: '.gallery-skeleton',
+            backgroundPosition: ['200% 0', '-200% 0'],
+            duration: 1400,
+            loop: true,
+            easing: 'linear'
+        });
+    }
 }
 
 // ── Gallery ──────────────────────────────────────────────────────────────────
@@ -319,7 +404,16 @@ function renderGallery() {
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
+            if (entry.isIntersecting) {
+                anime({
+                    targets: entry.target,
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    duration: 1000,
+                    easing: 'easeOutCubic'
+                });
+                observer.unobserve(entry.target);
+            }
         });
     }, { threshold: 0.1 });
 
@@ -348,6 +442,26 @@ function renderGallery() {
                 deleteBtn.addEventListener('click', () => deleteGalleryItem(item));
             }
         }
+
+        // Anime.js hover animation for gallery cards
+        card.addEventListener('mouseenter', () => {
+            anime({
+                targets: card,
+                translateY: -10,
+                background: 'rgba(255, 255, 255, 0.6)',
+                duration: 400,
+                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
+            });
+        });
+        card.addEventListener('mouseleave', () => {
+            anime({
+                targets: card,
+                translateY: 0,
+                background: 'rgba(255, 255, 255, 0.4)',
+                duration: 400,
+                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
+            });
+        });
 
         grid.appendChild(card);
         observer.observe(card);
@@ -398,10 +512,26 @@ function initUploadModal() {
     fabBtn.addEventListener('click', () => {
         resetUploadModal();
         modal.classList.add('active');
+        anime({
+            targets: modal,
+            opacity: [0, 1],
+            duration: 300,
+            easing: 'easeOutCubic'
+        });
     });
 
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+    function closeUploadModal() {
+        anime({
+            targets: modal,
+            opacity: [1, 0],
+            duration: 300,
+            easing: 'easeInCubic',
+            complete: () => modal.classList.remove('active')
+        });
+    }
+
+    closeBtn.addEventListener('click', closeUploadModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeUploadModal(); });
 
     // Drag-and-drop
     dropZone.addEventListener('click', () => fileInput.click());
@@ -456,7 +586,7 @@ function initUploadModal() {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            modal.classList.remove('active');
+            closeUploadModal();
         } catch (err) {
             console.error('Erro ao publicar:', err);
             alert('Não foi possível publicar a peça. Verifique sua conexão e tente novamente.');

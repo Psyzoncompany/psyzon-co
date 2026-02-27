@@ -153,12 +153,6 @@ body {
     gap: 20px;
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.8s ease-out;
-}
-
-.hero-actions.visible {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 .btn {
@@ -211,12 +205,6 @@ body {
     padding: 50px 40px;
     border-radius: 30px;
     box-shadow: var(--shadow);
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.glass-card:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.6);
 }
 
 .card-icon {
@@ -240,12 +228,6 @@ body {
 .fade-in {
     opacity: 0;
     transform: translateY(30px);
-    transition: all 1s ease-out;
-}
-
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 /* Typewriter Styles */
@@ -261,21 +243,8 @@ body {
 
 .typewriter-cursor::after {
     content: '|';
-    animation: blink 1s infinite;
     margin-left: 2px;
     font-weight: 300;
-}
-
-@keyframes blink {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0;
-    }
 }
 
 /* Modal Auth Styles */
@@ -292,12 +261,10 @@ body {
     align-items: center;
     z-index: 2000;
     opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
 .modal-overlay.active {
     display: flex;
-    opacity: 1;
 }
 
 .modal-content {
@@ -424,13 +391,7 @@ body {
     border-radius: 24px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
-}
-
-.gallery-card:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.6);
 }
 
 .gallery-card img {
@@ -483,13 +444,7 @@ body {
     border-radius: 24px;
     background: linear-gradient(90deg, rgba(200,200,200,0.3) 25%, rgba(220,220,220,0.5) 50%, rgba(200,200,200,0.3) 75%);
     background-size: 200% 100%;
-    animation: skeleton-shimmer 1.4s infinite;
     min-height: 280px;
-}
-
-@keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
 }
 
 /* Admin FAB */
