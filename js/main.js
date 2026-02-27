@@ -36,7 +36,7 @@ function initFirebase() {
             const loginTrigger = document.getElementById('login-trigger');
             if (loginTrigger) {
                 if (user) {
-                    const displayName = user.displayName || user.email.split('@')[0];
+                    const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
                     loginTrigger.textContent = displayName;
                     loginTrigger.dataset.logged = 'true';
                 } else {
