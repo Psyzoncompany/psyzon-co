@@ -20,6 +20,7 @@
             <a href="#servicos">Serviços</a>
             <a href="#qualidade">Qualidade</a>
             <a href="#processo">Processo</a>
+            <a href="#colecao">Coleção</a>
             <a href="#" id="login-trigger" class="cta-mini">Login</a>
         </nav>
     </header>
@@ -137,11 +138,47 @@
                 </div>
             </div>
         </section>
+
+        <!-- Galeria de Coleção -->
+        <section class="collection-section" id="colecao">
+            <div class="container">
+                <h2 class="section-title fade-in">Nossa Coleção</h2>
+                <div class="gallery-grid" id="gallery-grid">
+                    <!-- Skeleton loaders shown while loading -->
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                    <div class="gallery-skeleton"></div>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <!-- Admin Upload Button -->
+    <button id="admin-upload-btn" class="admin-fab" style="display:none;" title="Adicionar foto">＋</button>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal-overlay">
+        <div class="modal-content glass-card upload-modal-content">
+            <button id="close-upload-modal" class="close-btn">&times;</button>
+            <h2>Nova Peça</h2>
+            <p>Adicione uma nova foto à coleção</p>
+            <div id="drop-zone" class="drop-zone">
+                <span id="drop-zone-label">Arraste a foto aqui ou <u>clique para selecionar</u></span>
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                <img id="upload-preview" class="upload-preview" src="" alt="Preview" style="display:none;">
+            </div>
+            <div class="input-group" style="margin-top:20px;">
+                <input type="text" id="gallery-item-name" placeholder="Nome da peça" required>
+            </div>
+            <button id="publish-btn" class="btn btn-primary w-full">Publicar</button>
+        </div>
+    </div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
     <script src="js/main.js"></script>
 </body>

@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initFirebase();
 });
 
+// ── Admin e-mail – troque aqui e em firestore.rules para liberar o painel de upload ──
+const ADMIN_EMAIL = 'ADMIN_EMAIL_AQUI';
+
 // Firebase Configuration (Request: User should fill these with their actual project keys)
 const firebaseConfig = {
     apiKey: "AIzaSyCJu5MqpS4oIPvmaz3tyvVbQm92CR3yYEU",
@@ -19,6 +22,17 @@ function initFirebase() {
     if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
         console.log("Firebase Initialized");
+
+        initGallery();
+
+        firebase.auth().onAuthStateChanged(user => {
+            const isAdmin = user && user.email === ADMIN_EMAIL;
+            const fabBtn = document.getElementById('admin-upload-btn');
+            if (fabBtn) fabBtn.style.display = isAdmin ? 'flex' : 'none';
+
+            // Re-render gallery cards to show/hide delete buttons
+            renderGalleryAdminState(isAdmin);
+        });
     } else {
         console.error("Firebase SDK not loaded");
     }
@@ -246,4 +260,193 @@ function initScrollAnimations() {
 
     const fadeElements = document.querySelectorAll('.glass-card, .fade-in');
     fadeElements.forEach(el => observer.observe(el));
+}
+
+// ── Gallery ──────────────────────────────────────────────────────────────────
+
+let galleryItems = [];
+let galleryIsAdmin = false;
+
+function initGallery() {
+    const db = firebase.firestore();
+    db.collection('gallery')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+            galleryItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderGallery();
+        }, err => {
+            console.error('Gallery load error:', err);
+        });
+
+    initUploadModal();
+}
+
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    if (galleryItems.length === 0) {
+        grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;">Nenhuma peça adicionada ainda.</p>';
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+
+    galleryItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card fade-in';
+        card.dataset.id = item.id;
+        card.dataset.storagePath = item.storagePath || '';
+
+        const date = item.createdAt && item.createdAt.toDate
+            ? item.createdAt.toDate().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+            : '';
+
+        card.innerHTML = `
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">
+            <div class="gallery-card-info">
+                <h3>${escapeHtml(item.name)}</h3>
+                ${date ? `<span>${date}</span>` : ''}
+            </div>
+            ${galleryIsAdmin ? `<button class="gallery-delete-btn" title="Excluir peça">🗑</button>` : ''}
+        `;
+
+        if (galleryIsAdmin) {
+            const deleteBtn = card.querySelector('.gallery-delete-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => deleteGalleryItem(item));
+            }
+        }
+
+        grid.appendChild(card);
+        observer.observe(card);
+    });
+}
+
+function renderGalleryAdminState(isAdmin) {
+    galleryIsAdmin = isAdmin;
+    renderGallery();
+}
+
+function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(str || ''));
+    return d.innerHTML;
+}
+
+async function deleteGalleryItem(item) {
+    if (!confirm(`Excluir "${item.name}"?`)) return;
+    try {
+        if (item.storagePath) {
+            await firebase.storage().ref(item.storagePath).delete();
+        }
+        await firebase.firestore().collection('gallery').doc(item.id).delete();
+    } catch (err) {
+        console.error('Erro ao excluir:', err);
+        alert('Não foi possível excluir a peça. Tente novamente.');
+    }
+}
+
+// ── Upload Modal ──────────────────────────────────────────────────────────────
+
+function initUploadModal() {
+    const fabBtn = document.getElementById('admin-upload-btn');
+    const modal = document.getElementById('upload-modal');
+    const closeBtn = document.getElementById('close-upload-modal');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('gallery-file-input');
+    const preview = document.getElementById('upload-preview');
+    const dropLabel = document.getElementById('drop-zone-label');
+    const publishBtn = document.getElementById('publish-btn');
+    const nameInput = document.getElementById('gallery-item-name');
+
+    if (!fabBtn || !modal) return;
+
+    let selectedFile = null;
+
+    fabBtn.addEventListener('click', () => {
+        resetUploadModal();
+        modal.classList.add('active');
+    });
+
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+    // Drag-and-drop
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelected(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) handleFileSelected(fileInput.files[0]);
+    });
+
+    function handleFileSelected(file) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            alert('Formato inválido. Use JPG, PNG ou WebP.');
+            return;
+        }
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            dropLabel.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    publishBtn.addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        if (!selectedFile) { alert('Selecione uma foto.'); return; }
+        if (!name) { alert('Informe o nome da peça.'); return; }
+
+        publishBtn.disabled = true;
+        publishBtn.textContent = 'Publicando…';
+
+        try {
+            const timestamp = Date.now();
+            const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const storagePath = `gallery/${timestamp}_${safeName}`;
+            const storageRef = firebase.storage().ref(storagePath);
+            await storageRef.put(selectedFile);
+            const imageUrl = await storageRef.getDownloadURL();
+
+            await firebase.firestore().collection('gallery').add({
+                name,
+                imageUrl,
+                storagePath,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            modal.classList.remove('active');
+        } catch (err) {
+            console.error('Erro ao publicar:', err);
+            alert('Não foi possível publicar a peça. Verifique sua conexão e tente novamente.');
+        } finally {
+            publishBtn.disabled = false;
+            publishBtn.textContent = 'Publicar';
+        }
+    });
+
+    function resetUploadModal() {
+        selectedFile = null;
+        fileInput.value = '';
+        preview.src = '';
+        preview.style.display = 'none';
+        dropLabel.style.display = '';
+        nameInput.value = '';
+    }
 }
