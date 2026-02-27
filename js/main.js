@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initAnimation();
     initScrollAnimations();
     initCardHoverAnimations();
-    initCursorBlinkAnimation();
-    initSkeletonShimmer();
     initAuthModal();
     initFirebase();
 });
@@ -301,13 +299,7 @@ function initScrollAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                anime({
-                    targets: entry.target,
-                    opacity: [0, 1],
-                    translateY: [30, 0],
-                    duration: 1000,
-                    easing: 'easeOutCubic'
-                });
+                animateFadeIn(entry.target);
                 observer.unobserve(entry.target);
             }
         });
@@ -317,59 +309,40 @@ function initScrollAnimations() {
     fadeElements.forEach(el => observer.observe(el));
 }
 
-function initCardHoverAnimations() {
-    const cards = document.querySelectorAll('.glass-card, .gallery-card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            anime({
-                targets: card,
-                translateY: -10,
-                background: 'rgba(255, 255, 255, 0.6)',
-                duration: 400,
-                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
-            });
+function animateFadeIn(target) {
+    anime({
+        targets: target,
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 1000,
+        easing: 'easeOutCubic'
+    });
+}
+
+function addCardHoverAnimation(card) {
+    card.addEventListener('mouseenter', () => {
+        anime({
+            targets: card,
+            translateY: -10,
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            duration: 400,
+            easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
         });
-        card.addEventListener('mouseleave', () => {
-            anime({
-                targets: card,
-                translateY: 0,
-                background: 'rgba(255, 255, 255, 0.4)',
-                duration: 400,
-                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
-            });
+    });
+    card.addEventListener('mouseleave', () => {
+        anime({
+            targets: card,
+            translateY: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            duration: 400,
+            easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
         });
     });
 }
 
-function initCursorBlinkAnimation() {
-    const cursors = document.querySelectorAll('.typewriter-cursor::after');
-    if (cursors.length === 0) {
-        // Animate cursor blink via a style injection for the pseudo-element
-        anime({
-            targets: '.typewriter-cursor',
-            keyframes: [
-                { opacity: 1 },
-                { opacity: 0 },
-                { opacity: 1 }
-            ],
-            duration: 1000,
-            loop: true,
-            easing: 'steps(1)'
-        });
-    }
-}
-
-function initSkeletonShimmer() {
-    const skeletons = document.querySelectorAll('.gallery-skeleton');
-    if (skeletons.length > 0) {
-        anime({
-            targets: '.gallery-skeleton',
-            backgroundPosition: ['200% 0', '-200% 0'],
-            duration: 1400,
-            loop: true,
-            easing: 'linear'
-        });
-    }
+function initCardHoverAnimations() {
+    const cards = document.querySelectorAll('.glass-card, .gallery-card');
+    cards.forEach(card => addCardHoverAnimation(card));
 }
 
 // ── Gallery ──────────────────────────────────────────────────────────────────
@@ -405,13 +378,7 @@ function renderGallery() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                anime({
-                    targets: entry.target,
-                    opacity: [0, 1],
-                    translateY: [30, 0],
-                    duration: 1000,
-                    easing: 'easeOutCubic'
-                });
+                animateFadeIn(entry.target);
                 observer.unobserve(entry.target);
             }
         });
@@ -443,25 +410,7 @@ function renderGallery() {
             }
         }
 
-        // Anime.js hover animation for gallery cards
-        card.addEventListener('mouseenter', () => {
-            anime({
-                targets: card,
-                translateY: -10,
-                background: 'rgba(255, 255, 255, 0.6)',
-                duration: 400,
-                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
-            });
-        });
-        card.addEventListener('mouseleave', () => {
-            anime({
-                targets: card,
-                translateY: 0,
-                background: 'rgba(255, 255, 255, 0.4)',
-                duration: 400,
-                easing: 'cubicBezier(0.165, 0.84, 0.44, 1)'
-            });
-        });
+        addCardHoverAnimation(card);
 
         grid.appendChild(card);
         observer.observe(card);

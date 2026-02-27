@@ -243,8 +243,21 @@ body {
 
 .typewriter-cursor::after {
     content: '|';
+    animation: blink 1s infinite;
     margin-left: 2px;
     font-weight: 300;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 /* Modal Auth Styles */
@@ -444,7 +457,13 @@ body {
     border-radius: 24px;
     background: linear-gradient(90deg, rgba(200,200,200,0.3) 25%, rgba(220,220,220,0.5) 50%, rgba(200,200,200,0.3) 75%);
     background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
     min-height: 280px;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* Admin FAB */
