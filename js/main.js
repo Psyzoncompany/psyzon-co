@@ -334,7 +334,7 @@ function renderGallery() {
             : '';
 
         card.innerHTML = `
-            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
             <div class="gallery-card-info">
                 <h3>${escapeHtml(item.name)}</h3>
                 ${date ? `<span>${date}</span>` : ''}

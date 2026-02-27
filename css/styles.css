@@ -189,6 +189,8 @@ body {
 .features {
     padding: 120px 0;
     background-color: var(--bg-light);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
 }
 
 .container {
@@ -212,6 +214,7 @@ body {
     border-radius: 30px;
     box-shadow: var(--shadow);
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    will-change: transform;
 }
 
 .glass-card:hover {
@@ -400,6 +403,8 @@ body {
 .collection-section {
     padding: 120px 0;
     background-color: var(--bg-light);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
 }
 
 .section-title {
@@ -426,6 +431,7 @@ body {
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
+    will-change: transform;
 }
 
 .gallery-card:hover {
