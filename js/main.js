@@ -65,6 +65,8 @@ function initAuthModal() {
 
     if (!modal || !loginTrigger) return;
 
+    let modalAnimating = false;
+
     // Show/Hide Modal or Logout
     loginTrigger.addEventListener('click', (e) => {
         e.preventDefault();
@@ -77,23 +79,33 @@ function initAuthModal() {
                 });
             }
         } else {
+            if (modalAnimating) return;
+            modalAnimating = true;
             modal.classList.add('active');
+            anime.remove(modal);
             anime({
                 targets: modal,
                 opacity: [0, 1],
                 duration: 300,
-                easing: 'easeOutCubic'
+                easing: 'easeOutCubic',
+                complete: () => { modalAnimating = false; }
             });
         }
     });
 
     function closeModal() {
+        if (modalAnimating) return;
+        modalAnimating = true;
+        anime.remove(modal);
         anime({
             targets: modal,
             opacity: [1, 0],
             duration: 300,
             easing: 'easeInCubic',
-            complete: () => modal.classList.remove('active')
+            complete: () => {
+                modal.classList.remove('active');
+                modalAnimating = false;
+            }
         });
     }
 
@@ -321,6 +333,7 @@ function animateFadeIn(target) {
 
 function addCardHoverAnimation(card) {
     card.addEventListener('mouseenter', () => {
+        anime.remove(card);
         anime({
             targets: card,
             translateY: -10,
@@ -330,6 +343,7 @@ function addCardHoverAnimation(card) {
         });
     });
     card.addEventListener('mouseleave', () => {
+        anime.remove(card);
         anime({
             targets: card,
             translateY: 0,
@@ -341,7 +355,7 @@ function addCardHoverAnimation(card) {
 }
 
 function initCardHoverAnimations() {
-    const cards = document.querySelectorAll('.glass-card, .gallery-card');
+    const cards = document.querySelectorAll('.features .glass-card, .gallery-card');
     cards.forEach(card => addCardHoverAnimation(card));
 }
 
@@ -349,6 +363,7 @@ function initCardHoverAnimations() {
 
 let galleryItems = [];
 let galleryIsAdmin = false;
+let galleryObserver = null;
 
 function initGallery() {
     const db = firebase.firestore();
@@ -375,11 +390,13 @@ function renderGallery() {
         return;
     }
 
-    const observer = new IntersectionObserver((entries) => {
+    if (galleryObserver) galleryObserver.disconnect();
+
+    galleryObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 animateFadeIn(entry.target);
-                observer.unobserve(entry.target);
+                galleryObserver.unobserve(entry.target);
             }
         });
     }, { threshold: 0.1 });
@@ -413,7 +430,7 @@ function renderGallery() {
         addCardHoverAnimation(card);
 
         grid.appendChild(card);
-        observer.observe(card);
+        galleryObserver.observe(card);
     });
 }
 
@@ -457,25 +474,36 @@ function initUploadModal() {
     if (!fabBtn || !modal) return;
 
     let selectedFile = null;
+    let uploadModalAnimating = false;
 
     fabBtn.addEventListener('click', () => {
+        if (uploadModalAnimating) return;
+        uploadModalAnimating = true;
         resetUploadModal();
         modal.classList.add('active');
+        anime.remove(modal);
         anime({
             targets: modal,
             opacity: [0, 1],
             duration: 300,
-            easing: 'easeOutCubic'
+            easing: 'easeOutCubic',
+            complete: () => { uploadModalAnimating = false; }
         });
     });
 
     function closeUploadModal() {
+        if (uploadModalAnimating) return;
+        uploadModalAnimating = true;
+        anime.remove(modal);
         anime({
             targets: modal,
             opacity: [1, 0],
             duration: 300,
             easing: 'easeInCubic',
-            complete: () => modal.classList.remove('active')
+            complete: () => {
+                modal.classList.remove('active');
+                uploadModalAnimating = false;
+            }
         });
     }
 
