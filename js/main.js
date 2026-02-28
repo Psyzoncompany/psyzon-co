@@ -21,32 +21,35 @@ const firebaseConfig = {
 function initFirebase() {
     if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        console.log("Firebase Initialized");
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+            console.log("Firebase Initialized");
 
-        initGallery();
+            initGallery();
 
-        firebase.auth().onAuthStateChanged(user => {
-            const isAdmin = user && user.email === ADMIN_EMAIL;
-            const isLoggedIn = !!user;
-            const fabBtn = document.getElementById('admin-upload-btn');
-            if (fabBtn) fabBtn.style.display = isLoggedIn ? 'flex' : 'none';
+            firebase.auth().onAuthStateChanged(user => {
+                const isAdmin = user && user.email === ADMIN_EMAIL;
+                const isLoggedIn = !!user;
+                const fabBtn = document.getElementById('admin-upload-btn');
+                if (fabBtn) fabBtn.style.display = isLoggedIn ? 'flex' : 'none';
 
-            // Update login trigger to reflect auth state
-            const loginTrigger = document.getElementById('login-trigger');
-            if (loginTrigger) {
-                if (user) {
-                    const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
-                    loginTrigger.textContent = displayName;
-                    loginTrigger.dataset.logged = 'true';
-                } else {
-                    loginTrigger.textContent = 'Login';
-                    loginTrigger.dataset.logged = 'false';
+                // Update login trigger to reflect auth state
+                const loginTrigger = document.getElementById('login-trigger');
+                if (loginTrigger) {
+                    if (user) {
+                        const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+                        loginTrigger.textContent = displayName;
+                        loginTrigger.dataset.logged = 'true';
+                    } else {
+                        loginTrigger.textContent = 'Login';
+                        loginTrigger.dataset.logged = 'false';
+                    }
                 }
-            }
 
-            // Re-render gallery cards to show/hide delete buttons
-            renderGalleryAdminState(isAdmin);
+                // Re-render gallery cards to show/hide delete buttons
+                renderGalleryAdminState(isAdmin);
+            });
+        }).catch(err => {
+            console.error("Firebase persistence error:", err);
         });
     } else {
         console.error("Firebase SDK not loaded");
@@ -122,23 +125,43 @@ function initAuthModal() {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-password').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Entrando…';
         firebase.auth().signInWithEmailAndPassword(email, pass)
             .then(() => {
                 modal.classList.remove('active');
             })
-            .catch(err => alert("Erro ao fazer login: " + err.message));
+            .catch(err => alert("Erro ao fazer login: " + err.message))
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Entrar';
+            });
     });
 
     // Email Signup
     document.getElementById('signup-form').addEventListener('submit', (e) => {
         e.preventDefault();
+        const name = document.getElementById('signup-name').value.trim();
         const email = document.getElementById('signup-email').value;
         const pass = document.getElementById('signup-password').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Cadastrando…';
         firebase.auth().createUserWithEmailAndPassword(email, pass)
+            .then(userCredential => {
+                if (name) {
+                    return userCredential.user.updateProfile({ displayName: name });
+                }
+            })
             .then(() => {
                 modal.classList.remove('active');
             })
-            .catch(err => alert("Erro ao criar conta: " + err.message));
+            .catch(err => alert("Erro ao criar conta: " + err.message))
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Cadastrar';
+            });
     });
 }
 
