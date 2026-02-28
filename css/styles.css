@@ -239,6 +239,32 @@ body {
     font-size: 1rem;
 }
 
+/* Feature Cards – Background Images with Dark Overlay */
+.features .glass-card:nth-child(1),
+.features .glass-card:nth-child(2),
+.features .glass-card:nth-child(3) {
+    background-size: cover;
+    background-position: center;
+}
+
+.features .glass-card:nth-child(1) {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)), url('../image/tshit%20anima%C3%A7%C3%A3o/Tshirt_animation_studio_workbench_delpmaspu__016.jpg');
+}
+
+.features .glass-card:nth-child(2) {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)), url('../image/tshit%20anima%C3%A7%C3%A3o/Tshirt_animation_studio_workbench_delpmaspu__017.jpg');
+}
+
+.features .glass-card:nth-child(3) {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)), url('../image/tshit%20anima%C3%A7%C3%A3o/Tshirt_animation_studio_workbench_delpmaspu__018.jpg');
+}
+
+.features .glass-card h3,
+.features .glass-card p,
+.features .glass-card .card-icon {
+    color: #ffffff;
+}
+
 /* Scroll Animations */
 .fade-in {
     opacity: 0;
