@@ -1028,6 +1028,47 @@ main {
     box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
 }
 
+/* Botão de download na lista de arquivos */
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 12px;
+    background: rgba(6, 182, 212, 0.12);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-download svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-download:hover {
+    background: rgba(6, 182, 212, 0.22);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+/* YouTube iframe responsivo */
+.youtube-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: var(--radius-md);
+    z-index: 2;
+}
+
 
 /* ==========================================================================
    12. PAINEL DE DOWNLOAD (Estatísticas)
