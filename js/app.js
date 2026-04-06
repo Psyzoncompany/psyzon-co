@@ -1,6 +1,6 @@
 /* ==========================================================================
-   PSYZON STREAM — Logica Principal da Aplicacao
-   Aplicacao de streaming P2P via WebTorrent com player de video customizado.
+   PSYZON STREAM — Lógica Principal da Aplicação
+   Aplicação de streaming P2P via WebTorrent com player de vídeo customizado.
    ========================================================================== */
 
 (function () {
@@ -86,13 +86,15 @@
     let animFrameId = null;
     let isDraggingProgress = false;
     const MAX_LOG_ENTRIES = 200;
+    // .mp4 e .webm têm suporte nativo via MediaSource; demais formatos usam
+    // fallback via blob URL e podem não funcionar em todos os navegadores.
     const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.m4v', '.ogv'];
 
     // ======================================================================
     // 3. FUNCOES UTILITARIAS
     // ======================================================================
 
-    /** Formata bytes em unidade legivel (B, KB, MB, GB) */
+    /** Formata bytes em unidade legível (B, KB, MB, GB) */
     function formatBytes(bytes) {
         if (bytes === 0 || bytes == null) return '0 B';
         const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -101,7 +103,7 @@
         return (bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
     }
 
-    /** Formata segundos em MM:SS ou HH:MM:SS para o player */
+    /** Formata segundos em MM:SS ou HH:MM:SS */
     function formatTime(seconds) {
         if (!isFinite(seconds) || seconds < 0) return '0:00';
         const s = Math.floor(seconds);
@@ -113,7 +115,7 @@
         return m + ':' + secStr;
     }
 
-    /** Formata tempo restante estimado (ms) */
+    /** Formata tempo restante estimado (milissegundos) */
     function formatETA(ms) {
         if (ms == null || !isFinite(ms) || ms <= 0) return 'Calculando...';
         const totalSec = Math.floor(ms / 1000);
@@ -126,21 +128,21 @@
         return hours + 'h ' + mins + 'm';
     }
 
-    /** Formata velocidade de transferencia (bytes/s) */
+    /** Formata velocidade de transferência (bytes/s) */
     function formatSpeed(bytesPerSec) {
         if (bytesPerSec === 0 || bytesPerSec == null) return '0 KB/s';
         if (bytesPerSec >= 1048576) return (bytesPerSec / 1048576).toFixed(1) + ' MB/s';
         return (bytesPerSec / 1024).toFixed(0) + ' KB/s';
     }
 
-    /** Verifica se o arquivo e um video */
+    /** Verifica se o arquivo é um vídeo */
     function isVideoFile(filename) {
         if (!filename) return false;
         const ext = '.' + filename.split('.').pop().toLowerCase();
         return VIDEO_EXTENSIONS.includes(ext);
     }
 
-    /** Retorna o nome do icone Lucide para o tipo de arquivo */
+    /** Retorna o nome do ícone Lucide para o tipo de arquivo */
     function getFileIcon(filename) {
         if (isVideoFile(filename)) return 'video';
         const ext = filename ? filename.split('.').pop().toLowerCase() : '';
@@ -153,7 +155,7 @@
         return 'file';
     }
 
-    /** Escapa HTML para prevenir injecao de conteudo */
+    /** Escapa HTML para prevenir injeção de conteúdo */
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.appendChild(document.createTextNode(str || ''));
@@ -167,8 +169,8 @@
         idle:        { text: 'Aguardando entrada...', attr: 'idle' },
         connecting:  { text: 'Conectando peers...', attr: 'connecting' },
         downloading: { text: 'Baixando...', attr: 'downloading' },
-        ready:       { text: 'Pronto para reproducao', attr: 'ready' },
-        completed:   { text: 'Concluido', attr: 'complete' },
+        ready:       { text: 'Pronto para reprodução', attr: 'ready' },
+        completed:   { text: 'Concluído', attr: 'complete' },
         error:       { text: 'Erro', attr: 'error' },
     };
 
@@ -192,7 +194,7 @@
         type = type || 'info';
         if (!DOM.logList) return;
 
-        // Mostrar painel de log se escondido
+        // Mostrar painel de log se estiver escondido
         if (DOM.activityLog && DOM.activityLog.hidden) DOM.activityLog.hidden = false;
 
         // Limitar entradas
@@ -216,7 +218,7 @@
 
         DOM.logList.appendChild(li);
 
-        // Recriar icones Lucide nos novos elementos
+        // Recriar ícones Lucide nos novos elementos
         if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [li] });
 
         // Auto-scroll para a entrada mais recente
@@ -269,7 +271,7 @@
     function getClient() {
         if (client) return client;
         if (typeof WebTorrent === 'undefined') {
-            throw new Error('WebTorrent nao esta disponivel. Verifique se o CDN foi carregado.');
+            throw new Error('WebTorrent não está disponível. Verifique se o CDN foi carregado.');
         }
         client = new WebTorrent();
         client.on('error', function (err) {
@@ -289,19 +291,19 @@
         // Validar entrada
         if (!magnetUri && !torrentFile) {
             setStatus('error', 'Insira um magnet link ou selecione um arquivo .torrent');
-            addLog('Nenhuma entrada fornecida. Insira um magnet link ou selecione um arquivo .torrent.', 'warning');
+            addLog('Nenhuma entrada fornecida. Insira um magnet link ou arquivo .torrent.', 'warning');
             return;
         }
 
         if (magnetUri && !isValidMagnet(magnetUri)) {
-            setStatus('error', 'Magnet link invalido');
-            addLog('Formato de magnet link invalido. Deve comecar com "magnet:?" e conter "xt=urn:btih:".', 'error');
+            setStatus('error', 'Magnet link inválido');
+            addLog('Formato de magnet link inválido. Deve começar com "magnet:?" e conter "xt=urn:btih:".', 'error');
             return;
         }
 
         if (torrentFile && !isValidTorrentFile(torrentFile)) {
-            setStatus('error', 'Arquivo invalido');
-            addLog('Arquivo invalido. Selecione um arquivo com extensao .torrent.', 'error');
+            setStatus('error', 'Arquivo inválido');
+            addLog('Arquivo inválido. Selecione um arquivo com extensão .torrent.', 'error');
             return;
         }
 
@@ -312,7 +314,11 @@
 
             // Destruir torrent anterior
             if (currentTorrent) {
-                try { currentTorrent.destroy(); } catch (_) { /* ignorar */ }
+                try {
+                    currentTorrent.destroy();
+                } catch (destroyErr) {
+                    addLog('Aviso ao destruir torrent anterior: ' + destroyErr.message, 'warning');
+                }
                 currentTorrent = null;
             }
 
@@ -340,7 +346,7 @@
 
                 torrent.on('done', function () {
                     setStatus('completed');
-                    addLog('Download concluido! Todos os arquivos foram baixados.', 'success');
+                    addLog('Download concluído! Todos os arquivos foram baixados.', 'success');
                     if (DOM.streamingBadge) DOM.streamingBadge.style.display = 'none';
                     updateFileList(torrent);
                 });
@@ -351,7 +357,7 @@
         }
     }
 
-    /** Callback quando o torrent esta pronto */
+    /** Callback quando o torrent está pronto */
     function onTorrentReady(torrent) {
         setStatus('downloading');
         addLog('Torrent carregado: ' + torrent.name + ' (' + formatBytes(torrent.length) + ')', 'success');
@@ -412,7 +418,7 @@
             DOM.fileList.appendChild(li);
         });
 
-        // Recriar icones Lucide
+        // Recriar ícones Lucide
         if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [DOM.fileList] });
 
         // Iniciar atualizacao de progresso individual
@@ -454,11 +460,11 @@
     // 10. PLAYER DE VIDEO
     // ======================================================================
 
-    /** Reproduz um arquivo de video do torrent */
+    /** Reproduz um arquivo de vídeo do torrent */
     function playVideoFile(torrent, fileIndex) {
         const file = torrent.files[fileIndex];
         if (!file) {
-            addLog('Arquivo nao encontrado.', 'error');
+            addLog('Arquivo não encontrado.', 'error');
             return;
         }
 
@@ -466,19 +472,23 @@
         const video = DOM.videoPlayer;
         if (!video) return;
 
-        // Priorizar download das pecas deste arquivo
-        try { file.select(); } catch (_) { /* ignorar */ }
+        // Priorizar download das peças deste arquivo
+        try {
+            file.select();
+        } catch (selectErr) {
+            addLog('Aviso na priorização de peças: ' + selectErr.message, 'warning');
+        }
 
         // Esconder overlay, mostrar player
         if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
         if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = file.name;
 
-        // Badge de streaming se nao esta 100% baixado
+        // Badge de streaming se não está 100% baixado
         if (DOM.streamingBadge) {
             DOM.streamingBadge.style.display = file.progress < 1 ? '' : 'none';
         }
 
-        addLog('Reproducao iniciada: ' + file.name, 'info');
+        addLog('Reprodução iniciada: ' + file.name, 'info');
         setStatus('ready');
 
         const ext = '.' + file.name.split('.').pop().toLowerCase();
@@ -493,7 +503,7 @@
             try {
                 file.renderTo(video, { autoplay: true }, function (err) {
                     if (err) {
-                        addLog('Erro ao reproduzir com renderTo: ' + err.message + '. Tentando metodo alternativo...', 'warning');
+                        addLog('Erro ao reproduzir com renderTo: ' + err.message + '. Tentando método alternativo...', 'warning');
                         fallbackBlobPlayback(file, video);
                     }
                 });
@@ -514,12 +524,12 @@
             file.getBlobURL(function (err, url) {
                 if (err) {
                     addLog('Erro ao gerar URL do arquivo: ' + err.message, 'error');
-                    addLog('Este formato pode nao ser suportado pelo navegador.', 'warning');
+                    addLog('Este formato pode não ser suportado pelo navegador.', 'warning');
                     return;
                 }
                 video.src = url;
                 video.play().catch(function (playErr) {
-                    addLog('Codec nao suportado pelo navegador: ' + playErr.message, 'error');
+                    addLog('Codec não suportado pelo navegador: ' + playErr.message, 'error');
                 });
             });
         } catch (err) {
@@ -570,7 +580,7 @@
             });
         }
 
-        // Velocidade de reproducao
+        // Velocidade de reprodução
         if (DOM.speedSelector) {
             DOM.speedSelector.addEventListener('change', function (e) {
                 video.playbackRate = parseFloat(e.target.value);
@@ -592,11 +602,11 @@
         });
         video.addEventListener('ended', function () {
             updatePlayPauseIcon(false);
-            addLog('Reproducao encerrada.', 'info');
+            addLog('Reprodução encerrada.', 'info');
         });
         video.addEventListener('error', function () {
             const errorMsg = video.error ? video.error.message : 'Erro desconhecido';
-            addLog('Erro no player: ' + errorMsg + '. O codec pode nao ser compativel com este navegador.', 'error');
+            addLog('Erro no player: ' + errorMsg + '. O codec pode não ser compatível com este navegador.', 'error');
         });
         video.addEventListener('loadedmetadata', function () {
             if (DOM.duration) DOM.duration.textContent = formatTime(video.duration);
@@ -747,7 +757,7 @@
 
     // Atalhos de teclado
     function onKeyboardShortcut(e) {
-        // Nao capturar em campos de entrada
+        // Não capturar em campos de entrada
         const tag = e.target.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
@@ -776,7 +786,7 @@
         }
     }
 
-    /** Loop de atualizacao visual do player via requestAnimationFrame */
+    /** Loop de atualização visual do player via requestAnimationFrame */
     function startPlayerUpdateLoop() {
         if (animFrameId) cancelAnimationFrame(animFrameId);
         function loop() {
@@ -811,7 +821,7 @@
 
             if (DOM.torrentStatus) {
                 if (torrent.progress >= 1) {
-                    DOM.torrentStatus.textContent = 'Concluido - Fazendo seed';
+                    DOM.torrentStatus.textContent = 'Concluído - Fazendo seed';
                 } else if (torrent.numPeers > 0) {
                     DOM.torrentStatus.textContent = 'Baixando de ' + torrent.numPeers + ' peer(s)';
                 } else {
@@ -855,13 +865,15 @@
         }
     }
 
-    /** Limpa toda a interface e destroi torrents */
+    /** Limpa toda a interface e destrói torrents */
     function clearAll() {
         // Destruir torrents ativos
         if (client) {
             try {
                 client.torrents.forEach(function (t) { t.destroy(); });
-            } catch (_) { /* ignorar */ }
+            } catch (err) {
+                console.warn('Erro ao destruir torrents:', err);
+            }
         }
         currentTorrent = null;
         currentFile = null;
@@ -883,7 +895,7 @@
         }
         if (DOM.playerOverlay) DOM.playerOverlay.style.display = '';
         if (DOM.bufferingOverlay) DOM.bufferingOverlay.hidden = true;
-        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = 'Nenhum video selecionado';
+        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = 'Nenhum vídeo selecionado';
         if (DOM.streamingBadge) DOM.streamingBadge.style.display = '';
         if (DOM.currentTime) DOM.currentTime.textContent = '0:00';
         if (DOM.duration) DOM.duration.textContent = '0:00';
@@ -909,7 +921,7 @@
         if (DOM.totalSize) DOM.totalSize.textContent = '0 MB';
         if (DOM.downloadedSize) DOM.downloadedSize.textContent = '0 MB';
         if (DOM.timeRemaining) DOM.timeRemaining.textContent = 'Calculando...';
-        if (DOM.torrentStatus) DOM.torrentStatus.textContent = 'Verificacao de pecas';
+        if (DOM.torrentStatus) DOM.torrentStatus.textContent = 'Verificação de peças';
 
         setStatus('idle');
         clearLog();
