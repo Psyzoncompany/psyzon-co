@@ -197,9 +197,9 @@
         if (!dot || !text) return;
 
         var map = {
-            connected:    { attr: 'ready',   label: 'Conectado' },
-            disconnected: { attr: 'idle',    label: 'Desconectado' },
-            error:        { attr: 'error',   label: 'Erro de conexão' },
+            connected:    { attr: 'connected',    label: 'Conectado' },
+            disconnected: { attr: 'disconnected', label: 'Desconectado' },
+            error:        { attr: 'error',         label: 'Erro de conexão' },
         };
 
         var cfg = map[status] || map.disconnected;
