@@ -88,7 +88,12 @@
     const MAX_LOG_ENTRIES = 200;
     // .mp4 e .webm têm suporte nativo via MediaSource; demais formatos usam
     // fallback via blob URL e podem não funcionar em todos os navegadores.
-    const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.m4v', '.ogv'];
+    const VIDEO_EXTENSIONS = [
+        '.mp4', '.webm', '.mkv', '.avi', '.mov', '.m4v', '.ogv',
+        '.flv', '.wmv', '.3gp', '.3g2', '.ts', '.m2ts', '.mts',
+        '.vob', '.f4v', '.divx', '.rmvb', '.rm', '.asf', '.mpg',
+        '.mpeg', '.m2v', '.mxf', '.dv'
+    ];
 
     // ======================================================================
     // 3. FUNCOES UTILITARIAS
@@ -160,6 +165,19 @@
         const div = document.createElement('div');
         div.appendChild(document.createTextNode(str || ''));
         return div.innerHTML;
+    }
+
+    /** Verifica se a URL é um link do YouTube */
+    function isYouTubeUrl(url) {
+        if (typeof url !== 'string') return false;
+        return /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|shorts\/)|youtu\.be\/)[\w-]+/.test(url);
+    }
+
+    /** Extrai o ID do vídeo do YouTube a partir da URL */
+    function getYouTubeVideoId(url) {
+        if (typeof url !== 'string') return null;
+        var match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{10,12})/);
+        return match ? match[1] : null;
     }
 
     // ======================================================================
@@ -281,23 +299,29 @@
         return client;
     }
 
-    /** Inicia o download/streaming de um torrent */
+    /** Inicia o download/streaming de um torrent ou reproduz link do YouTube */
     function startTorrent() {
         const magnetUri = DOM.magnetInput ? DOM.magnetInput.value.trim() : '';
         const torrentFile = DOM.torrentFileInput && DOM.torrentFileInput.files
             ? DOM.torrentFileInput.files[0]
             : null;
 
+        // Verificar se é um link do YouTube
+        if (magnetUri && isYouTubeUrl(magnetUri)) {
+            playYouTubeVideo(magnetUri);
+            return;
+        }
+
         // Validar entrada
         if (!magnetUri && !torrentFile) {
-            setStatus('error', 'Insira um magnet link ou selecione um arquivo .torrent');
-            addLog('Nenhuma entrada fornecida. Insira um magnet link ou arquivo .torrent.', 'warning');
+            setStatus('error', 'Insira um magnet link, link do YouTube ou selecione um arquivo .torrent');
+            addLog('Nenhuma entrada fornecida. Insira um magnet link, link do YouTube ou arquivo .torrent.', 'warning');
             return;
         }
 
         if (magnetUri && !isValidMagnet(magnetUri)) {
-            setStatus('error', 'Magnet link inválido');
-            addLog('Formato de magnet link inválido. Deve começar com "magnet:?" e conter "xt=urn:btih:".', 'error');
+            setStatus('error', 'Link inválido');
+            addLog('Formato inválido. Use um magnet link (magnet:?xt=urn:btih:...) ou um link do YouTube.', 'error');
             return;
         }
 
@@ -370,6 +394,46 @@
         startStatsUpdater(torrent);
     }
 
+    /** Reproduz um vídeo do YouTube no player embutido */
+    function playYouTubeVideo(url) {
+        var videoId = getYouTubeVideoId(url);
+        if (!videoId) {
+            setStatus('error', 'Link do YouTube inválido');
+            addLog('Não foi possível extrair o ID do vídeo do YouTube.', 'error');
+            return;
+        }
+
+        addLog('Link do YouTube detectado. Carregando vídeo...', 'info');
+        setStatus('ready', 'Reproduzindo YouTube');
+
+        if (DOM.mainContent) DOM.mainContent.hidden = false;
+
+        // Esconder overlay e o player HTML5
+        if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
+        if (DOM.videoPlayer) DOM.videoPlayer.style.display = 'none';
+
+        // Remover iframe anterior se existir
+        var container = DOM.videoContainer;
+        if (!container) return;
+        var oldIframe = container.querySelector('.youtube-iframe');
+        if (oldIframe) oldIframe.remove();
+
+        // Criar iframe do YouTube
+        var iframe = document.createElement('iframe');
+        iframe.className = 'youtube-iframe';
+        iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&rel=0';
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.setAttribute('aria-label', 'Player do YouTube');
+
+        container.insertBefore(iframe, container.firstChild);
+
+        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = 'YouTube: ' + url;
+        if (DOM.streamingBadge) DOM.streamingBadge.style.display = 'none';
+
+        addLog('Vídeo do YouTube carregado com sucesso.', 'success');
+    }
+
     // ======================================================================
     // 9. LISTA DE ARQUIVOS
     // ======================================================================
@@ -404,6 +468,9 @@
                               '<i data-lucide="play"></i> Reproduzir' +
                           '</button>'
                         : '') +
+                    '<button class="btn btn-sm btn-download" data-file-index="' + index + '" aria-label="Baixar ' + escapeHtml(file.name) + '">' +
+                        '<i data-lucide="download"></i> Baixar' +
+                    '</button>' +
                     '<span class="badge badge-ready" hidden>Pronto</span>' +
                 '</div>';
 
@@ -412,6 +479,14 @@
             if (playBtn) {
                 playBtn.addEventListener('click', function () {
                     playVideoFile(torrent, index);
+                });
+            }
+
+            // Evento de clique no botão baixar
+            var downloadBtn = li.querySelector('.btn-download');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function () {
+                    downloadFile(torrent, index);
                 });
             }
 
@@ -457,8 +532,37 @@
     }
 
     // ======================================================================
-    // 10. PLAYER DE VIDEO
+    // 10. PLAYER DE VIDEO E DOWNLOAD DE ARQUIVOS
     // ======================================================================
+
+    /** Baixa qualquer arquivo do torrent */
+    function downloadFile(torrent, fileIndex) {
+        var file = torrent.files[fileIndex];
+        if (!file) {
+            addLog('Arquivo não encontrado.', 'error');
+            return;
+        }
+
+        addLog('Preparando download: ' + file.name + '...', 'info');
+
+        try {
+            file.getBlobURL(function (err, url) {
+                if (err) {
+                    addLog('Erro ao preparar download: ' + err.message, 'error');
+                    return;
+                }
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                addLog('Download iniciado: ' + file.name, 'success');
+            });
+        } catch (err) {
+            addLog('Erro ao baixar arquivo: ' + err.message, 'error');
+        }
+    }
 
     /** Reproduz um arquivo de vídeo do torrent */
     function playVideoFile(torrent, fileIndex) {
@@ -479,8 +583,13 @@
             addLog('Aviso na priorização de peças: ' + selectErr.message, 'warning');
         }
 
-        // Esconder overlay, mostrar player
+        // Esconder overlay, mostrar player (remover iframe do YouTube se existir)
         if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
+        video.style.display = '';
+        if (DOM.videoContainer) {
+            var ytIframe = DOM.videoContainer.querySelector('.youtube-iframe');
+            if (ytIframe) ytIframe.remove();
+        }
         if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = file.name;
 
         // Badge de streaming se não está 100% baixado
@@ -892,6 +1001,12 @@
             video.pause();
             video.removeAttribute('src');
             video.load();
+            video.style.display = '';
+        }
+        // Remover iframe do YouTube se existir
+        if (DOM.videoContainer) {
+            var ytIframe = DOM.videoContainer.querySelector('.youtube-iframe');
+            if (ytIframe) ytIframe.remove();
         }
         if (DOM.playerOverlay) DOM.playerOverlay.style.display = '';
         if (DOM.bufferingOverlay) DOM.bufferingOverlay.hidden = true;
