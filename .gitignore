@@ -33,3 +33,7 @@ coverage/
 # Misc
 *.log
 .cache/
+
+# Firebase
+.firebase/
+.firebaserc
