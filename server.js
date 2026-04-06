@@ -186,10 +186,13 @@ io.on('connection', (socket) => {
 
   /** Entrar em sala existente */
   socket.on('room:join', ({ roomId, userName } = {}) => {
-    if (!roomId || !isValidRoomCode(roomId)) {
+    // Normalize room code to uppercase before validation
+    const normalizedRoomId = typeof roomId === 'string' ? roomId.toUpperCase() : '';
+    if (!normalizedRoomId || !isValidRoomCode(normalizedRoomId)) {
       socket.emit('room:error', { message: 'Código de sala inválido' });
       return;
     }
+    roomId = normalizedRoomId;
 
     const room = rooms.get(roomId);
     if (!room) {

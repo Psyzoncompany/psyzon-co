@@ -663,7 +663,10 @@
         if (!ms || !ms.type) return;
 
         if (ms.type === 'youtube' && ms.url) {
-            loadYouTubeVideo(ms.url);
+            // Validate YouTube video ID format (11 chars, alphanumeric + dash/underscore)
+            if (/^[\w-]{10,12}$/.test(ms.url)) {
+                loadYouTubeVideo(ms.url);
+            }
         } else if (ms.type === 'link' && ms.url) {
             loadHTML5Video(ms.url, ms.name || ms.url);
         } else if (ms.type === 'file') {
