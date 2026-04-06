@@ -430,6 +430,7 @@ io.on('connection', (socket) => {
     const validTypes = ['file', 'link', 'youtube'];
     const type = validTypes.includes(mediaSource.type) ? mediaSource.type : 'link';
 
+    // Client sends 'title', stored as 'name' to match room mediaSource schema
     room.mediaSource = {
       type,
       url: typeof mediaSource.url === 'string' ? mediaSource.url : null,
