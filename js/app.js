@@ -176,7 +176,7 @@
     /** Extrai o ID do vídeo do YouTube a partir da URL */
     function getYouTubeVideoId(url) {
         if (typeof url !== 'string') return null;
-        var match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+        var match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{10,12})/);
         return match ? match[1] : null;
     }
 
@@ -421,8 +421,7 @@
         // Criar iframe do YouTube
         var iframe = document.createElement('iframe');
         iframe.className = 'youtube-iframe';
-        iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-        iframe.setAttribute('frameborder', '0');
+        iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&rel=0';
         iframe.setAttribute('allowfullscreen', '');
         iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
         iframe.setAttribute('aria-label', 'Player do YouTube');
