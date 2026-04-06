@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Psyzon Stream - Sala compartilhada para assistir junto com amigos em tempo real.">
+    <title>Psyzon Stream - Sala Compartilhada</title>
+
+    <!-- Preconnect para fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Folhas de estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sala.css">
+
+    <!-- Favicon SVG com ícone de play em gradiente roxo/azul -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Cpolygon points='12,8 12,24 26,16' fill='white'/%3E%3C/svg%3E">
+</head>
+
+<body>
+
+    <!-- ========================================
+         CABEÇALHO PRINCIPAL
+    ========================================= -->
+    <header class="site-header">
+        <div class="header-brand">
+            <div class="brand-icon" aria-hidden="true">
+                <i data-lucide="play" aria-hidden="true"></i>
+            </div>
+            <div class="brand-text">
+                <h1 class="brand-name">Psyzon Stream</h1>
+                <p class="brand-subtitle">Sala Compartilhada</p>
+            </div>
+        </div>
+
+        <nav class="header-nav" aria-label="Navegação principal">
+            <a href="index.html" class="nav-link">
+                <i data-lucide="arrow-left" aria-hidden="true"></i>
+                <span>Voltar ao Player</span>
+            </a>
+            <a href="sala.html" class="nav-link nav-link--active" aria-current="page">
+                <i data-lucide="users" aria-hidden="true"></i>
+                <span>Sala Compartilhada</span>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- ========================================
+             ESTADO 1: LOBBY - Criar / Entrar em Sala
+        ========================================= -->
+        <section id="lobby-section" class="lobby-section" aria-label="Lobby da sala compartilhada">
+            <div class="card lobby-card">
+                <div class="lobby-header">
+                    <h2 class="lobby-title">
+                        <i data-lucide="users" aria-hidden="true"></i>
+                        Sala Compartilhada
+                    </h2>
+                    <p class="lobby-subtitle">Assista junto com amigos em tempo real</p>
+                </div>
+
+                <div class="lobby-form">
+                    <!-- Nome do usuário -->
+                    <div class="input-field">
+                        <label for="username-input" class="sr-only">Seu nome</label>
+                        <i data-lucide="user" class="input-icon" aria-hidden="true"></i>
+                        <input
+                            type="text"
+                            id="username-input"
+                            class="text-input"
+                            placeholder="Seu nome"
+                            maxlength="30"
+                            aria-label="Digite seu nome de usuário"
+                        >
+                    </div>
+
+                    <!-- Botões de ação -->
+                    <div class="lobby-actions">
+                        <button id="btn-create-room" class="btn btn-primary btn-lg" aria-label="Criar uma nova sala">
+                            <i data-lucide="plus-circle" aria-hidden="true"></i>
+                            <span>Criar Sala</span>
+                        </button>
+                        <button id="btn-join-room" class="btn btn-secondary btn-lg" aria-label="Entrar em uma sala existente">
+                            <i data-lucide="log-in" aria-hidden="true"></i>
+                            <span>Entrar em Sala</span>
+                        </button>
+                    </div>
+
+                    <!-- Código da sala -->
+                    <div class="input-field">
+                        <label for="room-code-input" class="sr-only">Código da sala</label>
+                        <i data-lucide="hash" class="input-icon" aria-hidden="true"></i>
+                        <input
+                            type="text"
+                            id="room-code-input"
+                            class="text-input"
+                            placeholder="Código da sala (ex: ABC123)"
+                            maxlength="6"
+                            style="text-transform: uppercase;"
+                            aria-label="Digite o código da sala para entrar"
+                        >
+                    </div>
+
+                    <!-- Status de conexão -->
+                    <div id="connection-status" class="connection-status" aria-live="polite">
+                        <span class="status-dot" data-status="idle"></span>
+                        <span class="status-text">Desconectado</span>
+                    </div>
+
+                    <!-- Mensagem de erro -->
+                    <div id="lobby-error" class="lobby-error" role="alert" hidden>
+                        <i data-lucide="alert-circle" aria-hidden="true"></i>
+                        <span class="lobby-error-text"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+             ESTADO 2: SALA - Player + Sidebar
+        ========================================= -->
+        <section id="room-section" class="room-section" hidden aria-label="Sala compartilhada">
+
+            <!-- ----------------------------------------
+                 BARRA SUPERIOR - Informações da Sala
+            ----------------------------------------- -->
+            <div id="room-info-card" class="card room-info-card">
+                <div class="room-info-left">
+                    <div class="room-code-wrapper">
+                        <span class="room-code-label">Sala:</span>
+                        <span id="room-code-display" class="room-code-display">------</span>
+                        <button id="btn-copy-invite" class="btn btn-sm btn-secondary" aria-label="Copiar código da sala">
+                            <i data-lucide="copy" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="room-meta">
+                        <span class="room-meta-item">
+                            <i data-lucide="crown" aria-hidden="true"></i>
+                            Host: <strong id="room-host-name">---</strong>
+                        </span>
+                        <span class="room-meta-item">
+                            <i data-lucide="users" aria-hidden="true"></i>
+                            <span id="participant-count">0</span> participantes
+                        </span>
+                        <span id="media-type-badge" class="badge badge-media" hidden>
+                            <i data-lucide="film" aria-hidden="true"></i>
+                            <span>Nenhuma mídia</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="room-info-center">
+                    <div id="sync-status-indicator" class="sync-status" data-sync="idle" aria-live="polite">
+                        <span class="sync-dot"></span>
+                        <span class="sync-text">Sincronizado</span>
+                    </div>
+                    <div id="room-mode-toggle" class="room-mode-toggle" hidden>
+                        <button class="btn btn-sm btn-mode" data-mode="host" aria-label="Alternar modo da sala">
+                            <i data-lucide="shield" aria-hidden="true"></i>
+                            <span>Host Controla</span>
+                        </button>
+                    </div>
+                    <div id="last-action-info" class="last-action-info" aria-live="polite">
+                        <i data-lucide="activity" aria-hidden="true"></i>
+                        <span class="last-action-text">Nenhuma ação</span>
+                    </div>
+                </div>
+
+                <div class="room-info-right">
+                    <button id="btn-leave-room" class="btn btn-secondary btn-sm" aria-label="Sair da sala">
+                        <i data-lucide="log-out" aria-hidden="true"></i>
+                        <span>Sair</span>
+                    </button>
+                    <button id="btn-close-room" class="btn btn-danger btn-sm" hidden aria-label="Fechar sala (somente host)">
+                        <i data-lucide="x-circle" aria-hidden="true"></i>
+                        <span>Fechar Sala</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ----------------------------------------
+                 LAYOUT PRINCIPAL - Player + Sidebar
+            ----------------------------------------- -->
+            <div class="room-layout">
+
+                <!-- Coluna Principal - Player -->
+                <div class="room-main">
+
+                    <!-- Seletor de Fonte de Mídia -->
+                    <div id="media-source-selector" class="card media-source-selector">
+                        <div class="source-tabs" role="tablist" aria-label="Tipo de fonte de mídia">
+                            <button
+                                class="source-tab source-tab--active"
+                                data-source="file"
+                                role="tab"
+                                aria-selected="true"
+                                aria-controls="source-panel-file"
+                            >
+                                <i data-lucide="file-video" aria-hidden="true"></i>
+                                <span>Arquivo</span>
+                            </button>
+                            <button
+                                class="source-tab"
+                                data-source="link"
+                                role="tab"
+                                aria-selected="false"
+                                aria-controls="source-panel-link"
+                            >
+                                <i data-lucide="link" aria-hidden="true"></i>
+                                <span>Link Direto</span>
+                            </button>
+                            <button
+                                class="source-tab"
+                                data-source="youtube"
+                                role="tab"
+                                aria-selected="false"
+                                aria-controls="source-panel-youtube"
+                            >
+                                <i data-lucide="play-circle" aria-hidden="true"></i>
+                                <span>YouTube</span>
+                            </button>
+                        </div>
+
+                        <!-- Painel: Arquivo -->
+                        <div id="source-panel-file" class="source-panel source-panel--active" role="tabpanel">
+                            <div class="input-field">
+                                <label for="media-file-input" class="sr-only">Selecionar arquivo de vídeo</label>
+                                <i data-lucide="upload" class="input-icon" aria-hidden="true"></i>
+                                <input
+                                    type="file"
+                                    id="media-file-input"
+                                    class="file-input"
+                                    accept="video/*"
+                                    aria-label="Selecionar arquivo de vídeo para reproduzir"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Painel: Link Direto -->
+                        <div id="source-panel-link" class="source-panel" role="tabpanel" hidden>
+                            <div class="input-row">
+                                <div class="input-field">
+                                    <label for="media-link-input" class="sr-only">URL do vídeo</label>
+                                    <i data-lucide="link" class="input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="url"
+                                        id="media-link-input"
+                                        class="text-input"
+                                        placeholder="Cole a URL direta do vídeo..."
+                                        aria-label="URL direta do arquivo de vídeo"
+                                    >
+                                </div>
+                                <button class="btn btn-primary" aria-label="Carregar vídeo do link">
+                                    <i data-lucide="play" aria-hidden="true"></i>
+                                    <span>Carregar</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Painel: YouTube -->
+                        <div id="source-panel-youtube" class="source-panel" role="tabpanel" hidden>
+                            <div class="input-row">
+                                <div class="input-field">
+                                    <label for="youtube-url-input" class="sr-only">URL do YouTube</label>
+                                    <i data-lucide="play-circle" class="input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="url"
+                                        id="youtube-url-input"
+                                        class="text-input"
+                                        placeholder="Cole a URL do vídeo do YouTube..."
+                                        aria-label="URL do vídeo do YouTube"
+                                    >
+                                </div>
+                                <button id="btn-load-youtube" class="btn btn-primary" aria-label="Carregar vídeo do YouTube">
+                                    <i data-lucide="play" aria-hidden="true"></i>
+                                    <span>Carregar Vídeo</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área do Player -->
+                    <div id="player-area" class="player-area">
+
+                        <!-- Player HTML5 -->
+                        <div id="html5-player-container" class="video-container" data-state="idle">
+
+                            <!-- Elemento de vídeo HTML5 -->
+                            <video
+                                id="room-video-player"
+                                class="video-player"
+                                preload="auto"
+                                aria-label="Player de vídeo da sala"
+                            ></video>
+
+                            <!-- Overlay quando nenhum vídeo está selecionado -->
+                            <div id="room-player-overlay" class="player-overlay">
+                                <i data-lucide="film" aria-hidden="true"></i>
+                                <p>Selecione uma mídia para reproduzir</p>
+                            </div>
+
+                            <!-- Overlay de buffering / carregamento -->
+                            <div id="room-buffering-overlay" class="buffering-overlay" hidden>
+                                <div class="spinner" aria-hidden="true"></div>
+                                <p>Carregando buffer...</p>
+                            </div>
+
+                            <!-- Overlay de sincronização -->
+                            <div id="room-sync-overlay" class="sync-overlay" hidden>
+                                <div class="spinner" aria-hidden="true"></div>
+                                <p>Sincronizando com a sala...</p>
+                            </div>
+
+                            <!-- Controles customizados do player -->
+                            <div class="player-controls" aria-label="Controles do player">
+                                <div class="controls-row controls-row--progress">
+                                    <div class="progress-container" id="room-progress-container" role="slider" aria-label="Progresso do vídeo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                                        <div class="progress-buffer" id="room-progress-buffer"></div>
+                                        <div class="progress-bar" id="room-progress-bar"></div>
+                                        <div class="progress-handle" id="room-progress-handle"></div>
+                                    </div>
+                                </div>
+
+                                <div class="controls-row controls-row--buttons">
+                                    <!-- Grupo esquerdo: play, retroceder, avançar, tempo -->
+                                    <div class="controls-group controls-group--left">
+                                        <button id="room-btn-play-pause" class="control-btn" aria-label="Reproduzir / Pausar">
+                                            <i data-lucide="play" aria-hidden="true"></i>
+                                        </button>
+                                        <button id="room-btn-rewind" class="control-btn" aria-label="Retroceder 10 segundos">
+                                            <i data-lucide="rewind" aria-hidden="true"></i>
+                                        </button>
+                                        <button id="room-btn-forward" class="control-btn" aria-label="Avançar 10 segundos">
+                                            <i data-lucide="fast-forward" aria-hidden="true"></i>
+                                        </button>
+                                        <div class="time-display" aria-label="Tempo de reprodução">
+                                            <span id="room-current-time">0:00</span>
+                                            <span class="time-separator">/</span>
+                                            <span id="room-duration">0:00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Grupo direito: volume, velocidade, tela cheia -->
+                                    <div class="controls-group controls-group--right">
+                                        <div class="volume-control">
+                                            <button id="room-btn-volume" class="control-btn" aria-label="Volume">
+                                                <i data-lucide="volume-2" aria-hidden="true"></i>
+                                            </button>
+                                            <input
+                                                type="range"
+                                                id="room-volume-slider"
+                                                class="volume-slider"
+                                                min="0"
+                                                max="1"
+                                                step="0.05"
+                                                value="1"
+                                                aria-label="Controle de volume"
+                                            >
+                                        </div>
+
+                                        <div class="speed-control">
+                                            <select id="room-speed-selector" class="speed-selector" aria-label="Velocidade de reprodução">
+                                                <option value="0.5">0.5x</option>
+                                                <option value="1" selected>1x</option>
+                                                <option value="1.5">1.5x</option>
+                                                <option value="2">2x</option>
+                                            </select>
+                                        </div>
+
+                                        <button id="room-btn-fullscreen" class="control-btn" aria-label="Tela cheia">
+                                            <i data-lucide="maximize" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Player YouTube -->
+                        <div id="youtube-player-container" class="youtube-player-container" hidden>
+                            <div class="youtube-frame-wrapper">
+                                <div id="youtube-player-frame"></div>
+                            </div>
+                            <div class="youtube-info-bar">
+                                <div class="youtube-info-left">
+                                    <i data-lucide="play-circle" aria-hidden="true"></i>
+                                    <span id="youtube-video-title" class="youtube-video-title">Nenhum vídeo carregado</span>
+                                </div>
+                                <div class="youtube-info-right">
+                                    <button class="btn btn-sm btn-secondary" aria-label="Copiar link do YouTube">
+                                        <i data-lucide="copy" aria-hidden="true"></i>
+                                        <span>Copiar Link</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="youtube-sync-indicator" class="sync-status" data-sync="idle" aria-live="polite">
+                                <span class="sync-dot"></span>
+                                <span class="sync-text">Sincronizado</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------
+                     SIDEBAR - Participantes + Chat
+                ----------------------------------------- -->
+                <aside id="room-sidebar" class="room-sidebar">
+
+                    <!-- Painel de Participantes -->
+                    <div id="participants-panel" class="card participants-panel">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i data-lucide="users" aria-hidden="true"></i>
+                                Participantes
+                            </h2>
+                            <span class="badge badge-count" id="participants-count-badge">0</span>
+                        </div>
+                        <ul id="participants-list" class="participants-list" aria-label="Lista de participantes">
+                            <!-- Participantes inseridos dinamicamente pelo JS -->
+                            <!-- Estrutura de cada participante:
+                            <li class="participant-item" data-user-id="...">
+                                <div class="participant-avatar">A</div>
+                                <div class="participant-info">
+                                    <span class="participant-name">Nome</span>
+                                    <span class="badge badge-host">
+                                        <i data-lucide="crown"></i> Host
+                                    </span>
+                                </div>
+                                <span class="participant-sync-dot" data-sync="synced" title="Sincronizado"></span>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
+
+                    <!-- Painel de Chat -->
+                    <div id="chat-panel" class="card chat-panel">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i data-lucide="message-circle" aria-hidden="true"></i>
+                                Chat
+                            </h2>
+                        </div>
+
+                        <!-- Área de mensagens -->
+                        <div id="chat-messages" class="chat-messages" aria-label="Mensagens do chat" role="log" aria-live="polite">
+                            <!-- Mensagens inseridas dinamicamente pelo JS -->
+                            <!-- Estrutura de mensagem do sistema:
+                            <div class="chat-message chat-message--system">
+                                <span class="chat-message-text">Usuário entrou na sala.</span>
+                            </div>
+                            -->
+                            <!-- Estrutura de mensagem própria:
+                            <div class="chat-message chat-message--own">
+                                <div class="chat-message-header">
+                                    <span class="chat-message-name">Você</span>
+                                    <span class="chat-message-time">12:34</span>
+                                </div>
+                                <p class="chat-message-text">Texto da mensagem</p>
+                            </div>
+                            -->
+                            <!-- Estrutura de mensagem de outro usuário:
+                            <div class="chat-message chat-message--other">
+                                <div class="chat-message-header">
+                                    <span class="chat-message-name">Nome</span>
+                                    <span class="chat-message-time">12:34</span>
+                                </div>
+                                <p class="chat-message-text">Texto da mensagem</p>
+                            </div>
+                            -->
+                        </div>
+
+                        <!-- Indicador de digitação -->
+                        <div id="typing-indicator" class="typing-indicator" hidden aria-live="polite">
+                            <span class="typing-dots"><span></span><span></span><span></span></span>
+                            <span class="typing-text">Alguém está digitando...</span>
+                        </div>
+
+                        <!-- Entrada de chat -->
+                        <div class="chat-input-area">
+                            <div class="input-field">
+                                <label for="chat-input" class="sr-only">Mensagem do chat</label>
+                                <input
+                                    type="text"
+                                    id="chat-input"
+                                    class="text-input"
+                                    placeholder="Digite uma mensagem..."
+                                    maxlength="500"
+                                    aria-label="Digite uma mensagem para enviar no chat"
+                                >
+                            </div>
+                            <button id="btn-send-chat" class="btn btn-primary btn-send" aria-label="Enviar mensagem">
+                                <i data-lucide="send" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </aside>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================
+         RODAPÉ
+    ========================================= -->
+    <footer class="site-footer">
+        <div class="footer-disclaimer">
+            <p>⚠️ Esta plataforma destina-se exclusivamente à distribuição e reprodução de conteúdo legal, próprio, licenciado ou de domínio público.</p>
+        </div>
+        <p class="footer-copy">Psyzon Stream &copy; 2026 - Ferramenta para streaming de conteúdo autorizado</p>
+    </footer>
+
+    <!-- ========================================
+         SCRIPTS
+    ========================================= -->
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- Socket.IO client -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Lucide Icons - Biblioteca de ícones -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>lucide.createIcons();</script>
+
+    <!-- Lógica da sala compartilhada -->
+    <script src="js/sala.js"></script>
+
+</body>
+
+</html>

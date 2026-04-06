@@ -1,0 +1,14 @@
+{
+  "name": "psyzon-stream",
+  "version": "1.0.0",
+  "description": "Psyzon Stream - Plataforma de streaming P2P com sessões compartilhadas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "socket.io": "^4.8.0"
+  }
+}

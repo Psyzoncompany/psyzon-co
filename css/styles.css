@@ -278,6 +278,33 @@ main {
     letter-spacing: 0.02em;
 }
 
+/* Navegação no cabeçalho */
+.header-nav {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    margin-top: var(--space-md);
+    justify-content: center;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+}
+
+.nav-link--active {
+    color: var(--accent-purple);
+}
+
 
 /* ==========================================================================
    7. COMPONENTE: CARD BASE
