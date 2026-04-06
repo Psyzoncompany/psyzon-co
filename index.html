@@ -4,164 +4,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Psyzon – Estúdio de moda streetwear premium com design minimalista e qualidade têxtil superior.">
-    <title>Psyzon | Estúdio de Moda Premium</title>
+    <meta name="description" content="Psyzon Stream - Plataforma de streaming P2P para conteúdo autorizado via WebTorrent.">
+    <title>Psyzon Stream - Streaming P2P de Conteúdo Autorizado</title>
 
-    <!-- Preconnect / DNS-Prefetch for external origins -->
+    <!-- Preconnect para fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://www.gstatic.com">
-    <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Folha de estilos principal -->
     <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon SVG com ícone de play em gradiente roxo/azul -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Cpolygon points='12,8 12,24 26,16' fill='white'/%3E%3C/svg%3E">
 </head>
 
 <body>
 
-    <!-- Header Glassmorphism -->
-    <header class="glass-header">
-        <div class="logo">PSYZON</div>
-        <nav class="nav-links">
-            <a href="#servicos">Serviços</a>
-            <a href="#qualidade">Qualidade</a>
-            <a href="#processo">Processo</a>
-            <a href="galeria.html">Galeria</a>
-            <a href="#" id="login-trigger" class="cta-mini">Login</a>
-        </nav>
+    <!-- ========================================
+         CABEÇALHO PRINCIPAL
+    ========================================= -->
+    <header class="site-header">
+        <div class="header-brand">
+            <div class="brand-icon" aria-hidden="true">
+                <i data-lucide="play" aria-hidden="true"></i>
+            </div>
+            <div class="brand-text">
+                <h1 class="brand-name">Psyzon Stream</h1>
+                <p class="brand-subtitle">Streaming P2P de Conteúdo Autorizado</p>
+            </div>
+        </div>
     </header>
 
     <main>
-        <!-- Auth Modal -->
-        <div id="auth-modal" class="modal-overlay">
-            <div class="modal-content glass-card">
-                <button id="close-modal" class="close-btn">&times;</button>
 
-                <div id="login-view">
-                    <h2>Bem-vindo de volta</h2>
-                    <p>Entre com sua conta Psyzon</p>
-                    <form id="login-form">
-                        <div class="input-group">
-                            <input type="email" id="login-email" placeholder="E-mail" required>
-                        </div>
-                        <div class="input-group">
-                            <input type="password" id="login-password" placeholder="Senha" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-full">Entrar</button>
-                    </form>
-                    <div class="divider">ou</div>
-                    <button id="google-login" class="btn btn-secondary w-full google-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
-                        Entrar com Google
-                    </button>
-                    <p class="switch-view">Não tem uma conta? <a href="#" id="to-signup">Criar conta</a></p>
+        <!-- ========================================
+             SEÇÃO DE ENTRADA - Magnet link / Torrent
+        ========================================= -->
+        <section id="input-section" class="card input-card" aria-label="Entrada de torrent">
+            <div class="input-row">
+                <div class="input-field">
+                    <label for="magnet-input" class="sr-only">Magnet link</label>
+                    <i data-lucide="link" class="input-icon" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        id="magnet-input"
+                        class="text-input"
+                        placeholder="Cole seu magnet link aqui..."
+                        aria-label="Cole seu magnet link aqui"
+                    >
                 </div>
 
-                <div id="signup-view" style="display: none;">
-                    <h2>Criar conta</h2>
-                    <p>Cadastre-se para personalizar seus designs</p>
-                    <form id="signup-form">
-                        <div class="input-group">
-                            <input type="text" id="signup-name" placeholder="Nome completo" required>
-                        </div>
-                        <div class="input-group">
-                            <input type="email" id="signup-email" placeholder="E-mail" required>
-                        </div>
-                        <div class="input-group">
-                            <input type="password" id="signup-password" placeholder="Senha" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-full">Cadastrar</button>
-                    </form>
-                    <div class="divider">ou</div>
-                    <button id="google-signup" class="btn btn-secondary w-full google-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
-                        Cadastrar com Google
-                    </button>
-                    <p class="switch-view">Já tem uma conta? <a href="#" id="to-login">Fazer login</a></p>
+                <div class="input-file-wrapper">
+                    <label for="torrent-file" class="btn btn-file" aria-label="Selecionar arquivo .torrent">
+                        <i data-lucide="file-up" aria-hidden="true"></i>
+                        <span>.torrent</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="torrent-file"
+                        accept=".torrent"
+                        class="sr-only"
+                        aria-label="Selecionar arquivo torrent"
+                    >
                 </div>
+
+                <button id="btn-start" class="btn btn-primary" aria-label="Iniciar streaming">
+                    <i data-lucide="play" aria-hidden="true"></i>
+                    <span>Iniciar</span>
+                </button>
+
+                <button id="btn-clear" class="btn btn-secondary" aria-label="Limpar entrada">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                    <span>Limpar</span>
+                </button>
             </div>
-        </div>
-        <!-- Hero Section com Background Animado -->
-        <section class="hero">
-            <canvas id="tshirt-canvas"></canvas>
-            <div class="hero-overlay"></div>
 
-            <div class="hero-container">
-                <div class="hero-content">
-                    <h1>Moda Streetwear Premium.</h1>
-                    <p>Estúdio de vestuário personalizado focado em design minimalista e qualidade têxtil superior.</p>
-                    <div class="hero-actions">
-                        <a href="#personalizar" class="btn btn-primary">Criar Design</a>
-                        <a href="galeria.html" class="btn btn-secondary">Ver Coleção</a>
+            <!-- Indicador de status atual -->
+            <div id="status-indicator" class="status-indicator" aria-live="polite">
+                <span class="status-dot" data-status="idle"></span>
+                <span id="status-text" class="status-text">Aguardando entrada...</span>
+            </div>
+        </section>
+
+        <!-- ========================================
+             CONTEÚDO PRINCIPAL - Player + Arquivos
+        ========================================= -->
+        <section id="main-content" class="main-content" hidden aria-label="Conteúdo principal">
+            <div class="content-grid">
+
+                <!-- Coluna Esquerda - Player de Vídeo -->
+                <div id="player-section" class="player-section">
+                    <div class="video-container" data-state="idle">
+
+                        <!-- Elemento de vídeo HTML5 -->
+                        <video
+                            id="video-player"
+                            class="video-player"
+                            preload="auto"
+                            aria-label="Player de vídeo"
+                        ></video>
+
+                        <!-- Overlay quando nenhum vídeo está selecionado -->
+                        <div id="player-overlay" class="player-overlay">
+                            <i data-lucide="film" aria-hidden="true"></i>
+                            <p>Selecione um vídeo para reproduzir</p>
+                        </div>
+
+                        <!-- Overlay de buffering / carregamento -->
+                        <div id="buffering-overlay" class="buffering-overlay" hidden>
+                            <div class="spinner" aria-hidden="true"></div>
+                            <p>Carregando buffer...</p>
+                        </div>
+
+                        <!-- Controles customizados do player -->
+                        <div class="player-controls" aria-label="Controles do player">
+                            <div class="controls-row controls-row--progress">
+                                <div class="progress-container" id="progress-container" role="slider" aria-label="Progresso do vídeo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                                    <div class="progress-buffer" id="progress-buffer"></div>
+                                    <div class="progress-bar" id="progress-bar"></div>
+                                    <div class="progress-handle" id="progress-handle"></div>
+                                </div>
+                            </div>
+
+                            <div class="controls-row controls-row--buttons">
+                                <!-- Grupo esquerdo: play, retroceder, avançar, tempo -->
+                                <div class="controls-group controls-group--left">
+                                    <button id="btn-play-pause" class="control-btn" aria-label="Reproduzir / Pausar">
+                                        <i data-lucide="play" aria-hidden="true"></i>
+                                    </button>
+                                    <button id="btn-rewind" class="control-btn" aria-label="Retroceder 10 segundos">
+                                        <i data-lucide="rewind" aria-hidden="true"></i>
+                                    </button>
+                                    <button id="btn-forward" class="control-btn" aria-label="Avançar 10 segundos">
+                                        <i data-lucide="fast-forward" aria-hidden="true"></i>
+                                    </button>
+                                    <div class="time-display" aria-label="Tempo de reprodução">
+                                        <span id="current-time">0:00</span>
+                                        <span class="time-separator">/</span>
+                                        <span id="duration">0:00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Grupo direito: volume, velocidade, tela cheia -->
+                                <div class="controls-group controls-group--right">
+                                    <div class="volume-control">
+                                        <button id="btn-volume" class="control-btn" aria-label="Volume">
+                                            <i data-lucide="volume-2" aria-hidden="true"></i>
+                                        </button>
+                                        <input
+                                            type="range"
+                                            id="volume-slider"
+                                            class="volume-slider"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value="1"
+                                            aria-label="Controle de volume"
+                                        >
+                                    </div>
+
+                                    <div class="speed-control">
+                                        <select id="speed-selector" class="speed-selector" aria-label="Velocidade de reprodução">
+                                            <option value="0.5">0.5x</option>
+                                            <option value="1" selected>1x</option>
+                                            <option value="1.5">1.5x</option>
+                                            <option value="2">2x</option>
+                                        </select>
+                                    </div>
+
+                                    <button id="btn-fullscreen" class="control-btn" aria-label="Tela cheia">
+                                        <i data-lucide="maximize" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Informações do arquivo em reprodução -->
+                    <div class="now-playing">
+                        <div class="now-playing-info">
+                            <span id="now-playing-name" class="now-playing-name">Nenhum vídeo selecionado</span>
+                        </div>
+                        <span class="badge badge-streaming">
+                            <i data-lucide="wifi" aria-hidden="true"></i>
+                            Reproduzindo trechos já baixados
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita - Lista de Arquivos -->
+                <div id="files-section" class="files-section">
+                    <div class="card files-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i data-lucide="folder-open" aria-hidden="true"></i>
+                                Arquivos do Torrent
+                            </h2>
+                        </div>
+                        <ul id="file-list" class="file-list" aria-label="Lista de arquivos do torrent">
+                            <!-- Itens de arquivo são inseridos dinamicamente pelo JS -->
+                            <!-- Estrutura de cada item:
+                            <li class="file-item" data-file-index="0">
+                                <div class="file-item-icon">
+                                    <i data-lucide="video"></i>
+                                </div>
+                                <div class="file-item-info">
+                                    <span class="file-item-name" title="nome-completo.mp4">nome-completo.mp4</span>
+                                    <span class="file-item-size">250 MB</span>
+                                    <div class="file-item-progress">
+                                        <div class="file-item-progress-bar" data-progress="0"></div>
+                                    </div>
+                                    <span class="file-item-percent">0%</span>
+                                </div>
+                                <div class="file-item-actions">
+                                    <button class="btn btn-sm btn-play" aria-label="Reproduzir">
+                                        <i data-lucide="play"></i> Reproduzir
+                                    </button>
+                                    <span class="badge badge-ready" hidden>Pronto</span>
+                                </div>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================
+             PAINEL DE DOWNLOAD - Estatísticas
+        ========================================= -->
+        <section id="download-panel" class="card download-panel" hidden aria-label="Estatísticas de download">
+            <div class="stats-grid">
+                <!-- Progresso Geral -->
+                <div class="stat-item stat-item--wide">
+                    <div class="stat-label">
+                        <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+                        Progresso Geral
+                    </div>
+                    <div class="stat-progress-container">
+                        <div class="stat-progress-bar" id="overall-progress-bar" data-progress="0"></div>
+                    </div>
+                    <div class="stat-value" id="overall-progress-text">0%</div>
+                </div>
+
+                <!-- Velocidade de Download -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="download" aria-hidden="true"></i>
+                        Velocidade Download
+                    </div>
+                    <div class="stat-value" id="download-speed">0 KB/s</div>
+                </div>
+
+                <!-- Velocidade de Upload -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="upload" aria-hidden="true"></i>
+                        Velocidade Upload
+                    </div>
+                    <div class="stat-value" id="upload-speed">0 KB/s</div>
+                </div>
+
+                <!-- Peers Conectados -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="users" aria-hidden="true"></i>
+                        Peers Conectados
+                    </div>
+                    <div class="stat-value" id="peers-count">0</div>
+                </div>
+
+                <!-- Tamanho Total -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="hard-drive" aria-hidden="true"></i>
+                        Tamanho Total
+                    </div>
+                    <div class="stat-value" id="total-size">0 MB</div>
+                </div>
+
+                <!-- Tamanho Baixado -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="database" aria-hidden="true"></i>
+                        Tamanho Baixado
+                    </div>
+                    <div class="stat-value" id="downloaded-size">0 MB</div>
+                </div>
+
+                <!-- Tempo Restante -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="clock" aria-hidden="true"></i>
+                        Tempo Restante
+                    </div>
+                    <div class="stat-value" id="time-remaining">Calculando...</div>
+                </div>
+
+                <!-- Status -->
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i data-lucide="activity" aria-hidden="true"></i>
+                        Status
+                    </div>
+                    <div class="stat-value" id="torrent-status">Verificação de peças</div>
                 </div>
             </div>
         </section>
 
-        <!-- Cards de Características -->
-        <section class="features" id="servicos">
-            <div class="container">
-                <div class="glass-grid">
-                    <div class="glass-card fade-in">
-                        <div class="card-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                </polygon>
-                            </svg>
-                        </div>
-                        <h3>Qualidade Premium</h3>
-                        <p>Utilizamos os melhores materiais para garantir que suas peças durem e tenham um toque
-                            luxuoso.</p>
-                    </div>
-                    <div class="glass-card fade-in">
-                        <div class="card-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                                <path d="M2 2l7.5 1.5"></path>
-                                <path d="M7.6 7.6L2 2"></path>
-                            </svg>
-                        </div>
-                        <h3>Impressão Customizada</h3>
-                        <p>Nosso processo de impressão de última geração captura cada detalhe da sua visão.</p>
-                    </div>
-                    <div class="glass-card fade-in">
-                        <div class="card-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="1" y="3" width="15" height="13"></rect>
-                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                            </svg>
-                        </div>
-                        <h3>Produção Ágil</h3>
-                        <p>Produção rápida e logística eficiente para entregar seus designs no prazo.</p>
-                    </div>
-                </div>
+        <!-- ========================================
+             LOG DE ATIVIDADE
+        ========================================= -->
+        <section id="activity-log" class="card activity-log" hidden aria-label="Log de atividade">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="scroll-text" aria-hidden="true"></i>
+                    Log de Atividade
+                </h2>
+                <button id="btn-clear-log" class="btn btn-sm btn-secondary" aria-label="Limpar log de atividade">
+                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                    <span>Limpar</span>
+                </button>
             </div>
+            <ul id="log-list" class="log-list" aria-label="Entradas do log">
+                <!-- Entradas de log inseridas dinamicamente pelo JS -->
+                <!-- Estrutura de cada entrada:
+                <li class="log-entry">
+                    <i data-lucide="info" class="log-entry-icon" aria-hidden="true"></i>
+                    <span class="log-entry-time">12:34:56</span>
+                    <span class="log-entry-message">Torrent adicionado com sucesso.</span>
+                </li>
+                -->
+            </ul>
         </section>
 
-        <!-- Galeria CTA -->
-        <section class="collection-section" id="colecao">
-            <div class="container" style="text-align:center;">
-                <h2 class="section-title fade-in">Nossa Coleção</h2>
-                <p class="fade-in" style="color:var(--text-muted);font-size:1.2rem;margin-bottom:40px;">Explore nossas peças exclusivas na galeria completa.</p>
-                <a href="galeria.html" class="btn btn-primary fade-in">Ver Galeria</a>
-            </div>
-        </section>
     </main>
 
-    <!-- Firebase SDK (defer to avoid render-blocking) -->
-    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <!-- ========================================
+         RODAPÉ
+    ========================================= -->
+    <footer class="site-footer">
+        <div class="footer-disclaimer">
+            <p>⚠️ Esta plataforma destina-se exclusivamente à distribuição e reprodução de conteúdo legal, próprio, licenciado ou de domínio público.</p>
+        </div>
+        <p class="footer-copy">Psyzon Stream &copy; 2026 - Ferramenta para streaming de conteúdo autorizado</p>
+    </footer>
 
-    <script defer src="js/main.js"></script>
+    <!-- ========================================
+         MODAL DE USO RESPONSÁVEL
+    ========================================= -->
+    <div id="disclaimer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+        <div class="modal-content">
+            <div class="modal-icon" aria-hidden="true">
+                <i data-lucide="shield-alert"></i>
+            </div>
+            <h2 id="modal-title" class="modal-title">Aviso de Uso Responsável</h2>
+            <div class="modal-body">
+                <p>
+                    Esta plataforma utiliza tecnologia WebTorrent para streaming peer-to-peer (P2P) de conteúdo digital.
+                    Ela foi desenvolvida <strong>exclusivamente</strong> para a distribuição e reprodução de:
+                </p>
+                <ul>
+                    <li>Conteúdo próprio e original</li>
+                    <li>Conteúdo licenciado por seus detentores de direitos</li>
+                    <li>Conteúdo de domínio público</li>
+                    <li>Conteúdo sob licenças abertas (Creative Commons, etc.)</li>
+                </ul>
+                <p>
+                    O uso desta ferramenta para distribuir ou acessar conteúdo protegido por direitos autorais sem
+                    a devida autorização é <strong>estritamente proibido</strong> e de inteira responsabilidade do usuário.
+                </p>
+            </div>
+            <button id="btn-accept-disclaimer" class="btn btn-primary btn-lg" aria-label="Aceitar termos de uso">
+                <i data-lucide="check-circle" aria-hidden="true"></i>
+                <span>Entendi e Concordo</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================
+         SCRIPTS
+    ========================================= -->
+    <!-- WebTorrent - Cliente BitTorrent para o navegador -->
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
+
+    <!-- Lucide Icons - Biblioteca de ícones -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>lucide.createIcons();</script>
+
+    <!-- Lógica principal da aplicação -->
+    <script src="js/app.js"></script>
+
 </body>
 
 </html>
