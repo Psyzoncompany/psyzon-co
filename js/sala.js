@@ -687,8 +687,23 @@
     // 8. PLAYER HTML5
     // ======================================================================
 
+    /** Validates that a URL uses a safe protocol for media playback */
+    function isSafeMediaUrl(url) {
+        if (typeof url !== 'string') return false;
+        // blob: URLs are from URL.createObjectURL (local files)
+        if (url.startsWith('blob:')) return true;
+        try {
+            var parsed = new URL(url, window.location.origin);
+            return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+        } catch (e) {
+            return false;
+        }
+    }
+
     /** Carrega vídeo no player HTML5 */
     function loadHTML5Video(url, name) {
+        if (!isSafeMediaUrl(url)) return;
+
         if (DOM.html5PlayerContainer) DOM.html5PlayerContainer.hidden = false;
         if (DOM.youtubePlayerContainer) DOM.youtubePlayerContainer.hidden = true;
         if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
@@ -698,7 +713,7 @@
             DOM.videoPlayer.load();
         }
 
-        updateLastAction('Mídia carregada: ' + (name || 'vídeo'));
+        updateLastAction('Mídia carregada: ' + escapeHtml(name || 'vídeo'));
     }
 
     /** Retorna true se o usuário pode controlar a reprodução */
