@@ -5,7 +5,10 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "README.md"
+      "README.md",
+      "server.js",
+      "package.json",
+      "package-lock.json"
     ],
     "headers": [
       {
