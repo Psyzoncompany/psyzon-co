@@ -44,10 +44,12 @@
     // 2. ESTADO DO CARROSSEL
     // ======================================================================
     var DISPLAY_DURATION = 7000; // 7 segundos por imagem
+    var TRANSITION_DURATION = 600; // duração da transição CSS (0.6s)
+    var LANDSCAPE_RATIO_THRESHOLD = 1.4;
+    var PORTRAIT_RATIO_THRESHOLD = 0.7;
     var currentClientIndex = 0;
     var currentImageIndex = 0;
     var timerId = null;
-    var progressTimerId = null;
 
     // ======================================================================
     // 3. CACHE DE ELEMENTOS DOM
@@ -92,10 +94,10 @@
         // Quando a imagem carrega, adapta o card ao formato da imagem
         img.addEventListener('load', function () {
             var ratio = img.naturalWidth / img.naturalHeight;
-            if (ratio > 1.4) {
+            if (ratio > LANDSCAPE_RATIO_THRESHOLD) {
                 // Imagem paisagem larga
                 card.classList.add('sponsor-card--landscape');
-            } else if (ratio < 0.7) {
+            } else if (ratio < PORTRAIT_RATIO_THRESHOLD) {
                 // Imagem retrato alta
                 card.classList.add('sponsor-card--portrait');
             } else {
@@ -116,7 +118,7 @@
                     if (oldCard.parentNode) {
                         oldCard.parentNode.removeChild(oldCard);
                     }
-                }, 600);
+                }, TRANSITION_DURATION);
             })(existingCards[i]);
         }
 
