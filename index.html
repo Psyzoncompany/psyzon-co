@@ -340,6 +340,32 @@
             </ul>
         </section>
 
+        <!-- ========================================
+             SEÇÃO DE PATROCINADORES
+        ========================================= -->
+        <section id="sponsors-section" class="sponsors-section" aria-label="Patrocinadores">
+            <div class="card sponsors-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i data-lucide="award" aria-hidden="true"></i>
+                        Patrocinadores
+                    </h2>
+                </div>
+                <div class="sponsors-stage">
+                    <div id="sponsor-display" class="sponsor-display" aria-live="polite">
+                        <!-- Sponsor cards são inseridos dinamicamente pelo JS -->
+                    </div>
+                    <div class="sponsor-progress">
+                        <div class="sponsor-progress-bar" id="sponsor-progress-bar"></div>
+                    </div>
+                    <div class="sponsor-info">
+                        <span id="sponsor-client-name" class="sponsor-client-name"></span>
+                        <span id="sponsor-counter" class="sponsor-counter"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ========================================
@@ -396,6 +422,9 @@
 
     <!-- Lógica principal da aplicação -->
     <script src="js/app.js"></script>
+
+    <!-- Carrossel de patrocinadores -->
+    <script src="js/sponsors.js"></script>
 
 </body>
 

@@ -1242,6 +1242,209 @@ main {
 
 
 /* ==========================================================================
+   13b. SEÇÃO DE PATROCINADORES (Sponsors Carousel)
+   Carrossel de patrocinadores com rotação automática de 7s por imagem.
+   Cards adaptam-se ao formato da imagem e aparecem individualmente.
+   ========================================================================== */
+.sponsors-section {
+    margin-top: var(--space-xl);
+}
+
+.sponsors-card {
+    padding: var(--space-lg);
+}
+
+.sponsors-card .card-header {
+    margin-bottom: var(--space-lg);
+}
+
+/* Palco principal onde o card do patrocinador aparece */
+.sponsors-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+/* Área de exibição do card do patrocinador */
+.sponsor-display {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Card individual do patrocinador — grande para destaque */
+.sponsor-card {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 480px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card-hover);
+    border: 2px solid var(--border-subtle);
+    box-shadow: var(--shadow-lg), var(--shadow-glow-purple);
+    opacity: 1;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Estado de entrada: começa invisível e ligeiramente menor */
+.sponsor-card--entering {
+    opacity: 0;
+    transform: scale(0.92);
+}
+
+/* Estado visível: totalmente visível */
+.sponsor-card--visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Estado de saída: some */
+.sponsor-card--exiting {
+    opacity: 0;
+    transform: scale(0.92);
+    pointer-events: none;
+}
+
+/* Imagem do patrocinador — adapta ao formato */
+.sponsor-card-image {
+    display: block;
+    max-width: 100%;
+    max-height: 480px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Variantes de formato — adapta o card ao formato da foto */
+.sponsor-card--landscape {
+    width: 90%;
+    max-width: 800px;
+}
+
+.sponsor-card--landscape .sponsor-card-image {
+    width: 100%;
+    height: auto;
+}
+
+.sponsor-card--portrait {
+    width: auto;
+    max-width: 400px;
+}
+
+.sponsor-card--portrait .sponsor-card-image {
+    height: 480px;
+    width: auto;
+}
+
+.sponsor-card--square {
+    width: auto;
+    max-width: 500px;
+}
+
+.sponsor-card--square .sponsor-card-image {
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+}
+
+/* Barra de progresso para o timer de 7s */
+.sponsor-progress {
+    width: 100%;
+    max-width: 600px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.sponsor-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
+}
+
+/* Informações do patrocinador */
+.sponsor-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px;
+}
+
+.sponsor-client-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.sponsor-counter {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .sponsor-display {
+        min-height: 220px;
+    }
+
+    .sponsor-card {
+        max-height: 320px;
+    }
+
+    .sponsor-card-image {
+        max-height: 320px;
+    }
+
+    .sponsor-card--portrait .sponsor-card-image {
+        height: 320px;
+    }
+
+    .sponsor-card--square .sponsor-card-image {
+        max-height: 320px;
+    }
+
+    .sponsor-client-name {
+        font-size: var(--font-size-base);
+    }
+}
+
+@media (max-width: 480px) {
+    .sponsor-display {
+        min-height: 180px;
+    }
+
+    .sponsor-card {
+        max-width: 95%;
+        max-height: 250px;
+    }
+
+    .sponsor-card-image {
+        max-height: 250px;
+    }
+
+    .sponsor-card--portrait .sponsor-card-image {
+        height: 250px;
+    }
+
+    .sponsor-card--square .sponsor-card-image {
+        max-height: 250px;
+    }
+}
+
+
+/* ==========================================================================
    14. RODAPÉ (Footer)
    Texto discreto, centralizado, com aviso legal em destaque sutil.
    ========================================================================== */
