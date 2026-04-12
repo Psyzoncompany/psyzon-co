@@ -1,25 +1,44 @@
-# Psyzon Stream 🎬
+# Copa Psyzon 🏆
 
-**Streaming P2P de Conteúdo Autorizado**
+**Plataforma de Torneios & Campeonatos**
 
-Plataforma web moderna para streaming progressivo de vídeo via torrents usando WebTorrent. Cole um magnet link ou envie um arquivo `.torrent` e assista ao conteúdo de vídeo enquanto o download acontece em tempo real.
-
-> ⚠️ Esta plataforma destina-se exclusivamente à distribuição e reprodução de conteúdo legal, próprio, licenciado ou de domínio público.
+Sistema completo de gestão de campeonatos gamer, voltado para eventos presenciais da Copa PSYZON. Organize torneios de FIFA (e futuramente Counter-Strike e Sinuca) com cadastro de participantes, chaveamento automático, registro de resultados e histórico de campeões.
 
 ## ✨ Funcionalidades
 
-- 🧲 Suporte a magnet links e arquivos `.torrent`
-- 🎥 Player de vídeo customizado com streaming progressivo
-- 📊 Painel de métricas em tempo real (velocidade, peers, progresso)
-- 📁 Lista de arquivos com progresso individual
-- 📋 Log de atividade com eventos detalhados
-- 🌙 Tema escuro sofisticado
-- 📱 Design responsivo (mobile-first)
-- ⌨️ Atalhos de teclado (Espaço, Setas, M, F)
+### Tela Inicial e Perfis
+- 🎮 Seleção de modo de jogo (FIFA ativo, CS e Sinuca em breve)
+- 🔑 Três perfis de acesso: Organizador, Participante e Visitante
+- 🔢 Entrada de participantes por código de sala de 4 dígitos
 
-## 🚀 Como Rodar Localmente
+### Cadastro de Participantes
+- 📸 Upload de foto de perfil
+- 🏳️ Seleção de bandeira/seleção
+- 📋 Dados completos: nome, CPF, Instagram, WhatsApp, nick
+- 🔍 Busca de cadastro anterior por CPF
 
-### Opção 1: Servidor HTTP simples
+### Painel do Organizador
+- ⚙️ Configuração de torneio (nome, premiação, quantidade de times)
+- 👥 Gerenciamento de times e jogadores
+- 🔄 Modo casa e fora (ida e volta)
+- 🔐 Geração de códigos de acesso
+- 💾 Backup e restauração por JSON
+
+### Motor do Torneio
+- 🔀 Embaralhar e gerar chaveamento (4, 8, 16 ou 32 times)
+- 🌳 Visualização em árvore ou lista
+- ⚽ Registro de resultados com ida, volta e pênaltis
+- 🏆 Encerramento de torneio com histórico
+
+### Estatísticas e Ranking
+- 🏆 Troféus, finais, semifinais
+- ⚽ Gols feitos, gols tomados, saldo de gols
+- 📊 Ranking geral de jogadores
+- 📜 Histórico completo de campeões
+
+## 🚀 Como Rodar
+
+### Servidor HTTP local
 
 ```bash
 # Com Python 3
@@ -34,7 +53,7 @@ php -S localhost:8000
 
 Acesse `http://localhost:8000` no navegador.
 
-### Opção 2: Firebase Hosting (Deploy)
+### Firebase Hosting (Deploy)
 
 ```bash
 npm install -g firebase-tools
@@ -42,61 +61,42 @@ firebase login
 firebase deploy --only hosting
 ```
 
-### Opção 3: Abrir direto no navegador
-
-Abra o arquivo `index.html` diretamente no navegador. Nota: Algumas funcionalidades do WebTorrent podem requerer um servidor HTTP.
-
 ## 🛠️ Tecnologias
 
 | Tecnologia | Uso |
 |---|---|
 | HTML5 | Estrutura semântica |
-| CSS3 | Tema escuro, animações, responsividade |
-| JavaScript ES6+ | Lógica da aplicação |
-| [WebTorrent](https://webtorrent.io/) | Engine de torrent no navegador |
-| [Lucide Icons](https://lucide.dev/) | Ícones minimalistas |
+| CSS3 | Tema escuro gaming, responsivo |
+| JavaScript ES6 | Lógica da aplicação (vanilla, sem dependências) |
+| localStorage | Persistência de dados no navegador |
 | [Inter](https://rsms.me/inter/) | Tipografia moderna |
 
 ## 📐 Estrutura do Projeto
 
 ```
 psyzon-co/
-├── index.html          # Página principal
+├── index.html          # Página principal (todas as telas)
 ├── css/
-│   └── styles.css      # Estilos (tema escuro, responsivo)
+│   └── styles.css      # Estilos (tema escuro gaming)
 ├── js/
-│   └── app.js          # Aplicação principal (WebTorrent + Player)
+│   ├── data.js         # Gerenciamento de dados (localStorage)
+│   ├── tournament.js   # Motor do torneio (chaveamento, resultados)
+│   └── app.js          # Controlador principal (UI, eventos)
 ├── firebase.json       # Configuração do Firebase Hosting
 ├── .gitignore          # Arquivos ignorados pelo Git
 └── README.md           # Este arquivo
 ```
-
-## ⚠️ Limitações do Streaming no Navegador
-
-| Formato | Suporte | Observação |
-|---|---|---|
-| `.mp4` (H.264) | ✅ Excelente | Melhor formato para streaming progressivo |
-| `.webm` (VP8/VP9) | ✅ Bom | Suportado nativamente na maioria dos navegadores |
-| `.mkv` | ⚠️ Limitado | Navegadores geralmente não suportam MKV nativamente. Tentativa via blob URL |
-| `.avi` | ❌ Não suportado | Formato legado, não suportado por HTML5 Video |
-| `.mov` | ⚠️ Parcial | Suporte variável entre navegadores |
-
-### Recomendações para melhor experiência:
-- Use arquivos **MP4 com codec H.264** para melhor compatibilidade
-- **WebM com VP9** é uma boa alternativa
-- Formatos como MKV, AVI, MOV podem não funcionar para streaming progressivo
-- O streaming funciona melhor com torrents que possuem muitos seeders
 
 ## 📱 Compatibilidade
 
 - Chrome 80+ ✅
 - Firefox 80+ ✅
 - Edge 80+ ✅
-- Safari 14+ ⚠️ (suporte limitado a WebRTC)
+- Safari 14+ ✅
 - Mobile Chrome ✅
 - Mobile Firefox ✅
-- Mobile Safari ⚠️
+- Mobile Safari ✅
 
 ## 📄 Licença
 
-Este projeto é uma ferramenta para streaming de conteúdo autorizado. Uso responsável é de responsabilidade do usuário.
+© 2026 Psyzon Company. Todos os direitos reservados.
