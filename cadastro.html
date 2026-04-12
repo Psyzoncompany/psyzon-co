@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Copa Psyzon - Cadastro de Participante">
+    <title>Copa Psyzon — Cadastro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='2' y='26' font-size='28'%3E%F0%9F%8F%86%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="container-sm">
+
+            <button class="btn-back" id="btn-back">&#8592; Voltar</button>
+
+            <!-- Logo -->
+            <div class="logo-block">
+                <span class="trophy-icon">&#127919;</span>
+                <h1 class="logo-title" style="font-size:1.8rem;">Cadastro</h1>
+                <p class="logo-subtitle">Insira seu código de acesso</p>
+            </div>
+
+            <!-- Card de Código -->
+            <div class="glass-card text-center">
+                <h2 style="font-size:1.1rem;margin-bottom:0.5rem;">Código de 4 dígitos</h2>
+                <p class="text-muted mb-3" style="font-size:0.9rem;">Fornecido pelo organizador do torneio</p>
+
+                <div class="flex-center mb-3">
+                    <input type="text" id="input-code" class="code-input" maxlength="4" placeholder="0000"
+                        inputmode="numeric" autocomplete="off">
+                </div>
+
+                <button class="btn btn-primary btn-lg btn-block" id="btn-validate">Validar e Entrar</button>
+
+                <p id="code-error" class="error-text mt-2" hidden></p>
+                <p id="code-success" class="success-text mt-2" hidden></p>
+
+                <div id="loading-spinner" class="flex-center mt-2" hidden>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <p class="text-center text-muted mt-4" style="font-size:0.8rem;">&copy; 2026 Psyzon Company</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/cadastro.js"></script>
+</body>
+
+</html>
