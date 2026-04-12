@@ -10,7 +10,9 @@ var FirebaseConfig = (function () {
 
     /* ------------------------------------------------------------------
        Configuração do projeto Firebase
-       IMPORTANTE: Substitua pelos dados reais do projeto no console Firebase
+       IMPORTANTE: Substitua pelos dados reais do seu projeto Firebase.
+       Acesse https://console.firebase.google.com → Configurações do projeto
+       → Seus apps → Config para obter os valores corretos.
     ------------------------------------------------------------------ */
     var config = {
         apiKey: "AIzaSyD_PLACEHOLDER_KEY",
