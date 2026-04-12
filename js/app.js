@@ -227,7 +227,11 @@
             };
 
             if (!playerData.name || !playerData.nick || !playerData.cpf) {
-                toast('Preencha os campos obrigatórios!');
+                var missing = [];
+                if (!playerData.name) missing.push('Nome');
+                if (!playerData.nick) missing.push('Nick');
+                if (!playerData.cpf) missing.push('CPF');
+                toast('Preencha: ' + missing.join(', '));
                 return;
             }
 
