@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Copa Psyzon - Chaveamento do Torneio">
+    <title>Copa Psyzon — Chaveamento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='2' y='26' font-size='28'%3E%F0%9F%8F%86%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+
+            <button class="btn-back" id="btn-back">&#8592; Voltar</button>
+
+            <!-- Prize Card -->
+            <div class="prize-card mb-3" id="prize-card">
+                <span class="trophy-icon">&#127942;</span>
+                <div class="prize-text" id="prize-text">Premiação a definir</div>
+                <div class="prize-label">Premiação do torneio</div>
+            </div>
+
+            <!-- Copa Name -->
+            <div class="copa-header">
+                <h1 class="copa-name" id="copa-name">Copa Psyzon</h1>
+                <span class="badge badge-active" id="copa-status">Ativo</span>
+            </div>
+
+            <!-- Menu Tabs -->
+            <div class="tab-menu mb-4" id="main-tabs">
+                <button class="tab-btn active" data-tab="tab-bracket">&#127942; Chaveamento</button>
+                <button class="tab-btn" data-tab="tab-ranking">&#128200; Ranking</button>
+                <button class="tab-btn" data-tab="tab-history">&#128220; Histórico</button>
+                <button class="tab-btn" data-tab="tab-sponsors">&#129309; Patrocinadores</button>
+            </div>
+
+            <!-- ==================== TAB: CHAVEAMENTO ==================== -->
+            <div class="tab-content active" id="tab-bracket">
+
+                <!-- Organizer controls -->
+                <div class="glass-card mb-3" id="org-controls" hidden>
+                    <h3 style="font-size:1rem;margin-bottom:1rem;">&#9881;&#65039; Painel do Organizador</h3>
+
+                    <!-- Config -->
+                    <div class="config-panel mb-3">
+                        <div class="config-row">
+                            <div class="form-group">
+                                <label for="cfg-name">Nome do torneio</label>
+                                <input type="text" id="cfg-name" class="form-input" placeholder="Copa Psyzon FIFA 2026">
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-prize">Premiação</label>
+                                <input type="text" id="cfg-prize" class="form-input" placeholder="R$ 500,00">
+                            </div>
+                        </div>
+                        <div class="config-row">
+                            <div class="form-group">
+                                <label for="cfg-teams">Quantidade de times</label>
+                                <select id="cfg-teams" class="form-input">
+                                    <option value="4">4 times</option>
+                                    <option value="8" selected>8 times</option>
+                                    <option value="16">16 times</option>
+                                    <option value="32">32 times</option>
+                                    <option value="custom">Personalizado</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="custom-teams-group" hidden>
+                                <label for="cfg-custom-teams">Número personalizado</label>
+                                <input type="number" id="cfg-custom-teams" class="form-input" min="2" max="64"
+                                    placeholder="Ex: 12">
+                            </div>
+                        </div>
+                        <div class="config-row">
+                            <div class="form-group">
+                                <label for="cfg-system">Sistema</label>
+                                <select id="cfg-system" class="form-input">
+                                    <option value="knockout">Mata-mata</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cfg-homeaway">Ida e volta</label>
+                                <select id="cfg-homeaway" class="form-input">
+                                    <option value="false">Não</option>
+                                    <option value="true">Sim</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Players management -->
+                    <div class="glass-card-sm mb-3">
+                        <h4 style="font-size:0.95rem;margin-bottom:0.75rem;">&#128101; Jogadores</h4>
+                        <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                            <input type="text" id="add-player-name" class="form-input" placeholder="Nome do jogador"
+                                style="flex:1;min-width:150px;">
+                            <button class="btn btn-success btn-sm" id="btn-add-player">+ Adicionar</button>
+                        </div>
+                        <div class="player-list" id="player-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="config-actions">
+                        <button class="btn btn-primary btn-sm" id="btn-shuffle">&#128256; Embaralhar</button>
+                        <button class="btn btn-sm" id="btn-generate-codes">&#128273; Gerar Códigos</button>
+                        <button class="btn btn-sm" id="btn-export">&#128229; Exportar JSON</button>
+                        <button class="btn btn-sm" id="btn-import">&#128228; Importar JSON</button>
+                        <button class="btn btn-danger btn-sm" id="btn-end-tournament">&#128721; Encerrar</button>
+                        <button class="btn btn-danger btn-sm" id="btn-reset-tournament">&#128260; Resetar</button>
+                        <button class="btn btn-danger btn-sm" id="btn-cancel-tournament">&#10060; Cancelar</button>
+                        <button class="btn btn-danger btn-sm" id="btn-reset-all">&#9888;&#65039; Resetar Tudo</button>
+                    </div>
+                    <input type="file" id="import-file" accept=".json" hidden>
+
+                    <!-- Generated codes display -->
+                    <div id="codes-display" class="glass-card-sm mt-2" hidden>
+                        <h4 style="font-size:0.9rem;margin-bottom:0.5rem;">Códigos de Acesso Gerados</h4>
+                        <div id="codes-list" style="display:flex;flex-wrap:wrap;gap:0.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- View Toggle -->
+                <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+                    <button class="btn btn-sm active" id="view-tree" data-view="tree">&#127795; Árvore</button>
+                    <button class="btn btn-sm" id="view-list" data-view="list">&#128203; Lista</button>
+                </div>
+
+                <!-- Bracket display -->
+                <div id="bracket-container">
+                    <div class="empty-state" id="bracket-empty">
+                        <span class="empty-icon">&#127942;</span>
+                        <p>Nenhum chaveamento gerado ainda.</p>
+                        <p class="text-muted mt-1">O organizador precisa criar o torneio.</p>
+                    </div>
+                    <div id="bracket-tree-view" class="bracket-tree" hidden></div>
+                    <div id="bracket-list-view" class="bracket-list" hidden></div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: RANKING ==================== -->
+            <div class="tab-content" id="tab-ranking">
+                <div class="glass-card">
+                    <h3 style="font-size:1.1rem;margin-bottom:1rem;">&#128200; Ranking de Jogadores</h3>
+                    <div id="ranking-container">
+                        <div class="empty-state">
+                            <span class="empty-icon">&#128200;</span>
+                            <p>Nenhuma estatística disponível ainda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: HISTÓRICO ==================== -->
+            <div class="tab-content" id="tab-history">
+                <div class="glass-card">
+                    <h3 style="font-size:1.1rem;margin-bottom:1rem;">&#128220; Histórico de Campeões</h3>
+                    <div class="history-list" id="history-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">&#128220;</span>
+                            <p>Nenhum torneio finalizado ainda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: PATROCINADORES ==================== -->
+            <div class="tab-content" id="tab-sponsors">
+                <div class="glass-card">
+                    <h3 style="font-size:1.1rem;margin-bottom:1rem;">&#129309; Patrocinadores</h3>
+
+                    <!-- Carousel -->
+                    <div class="sponsor-carousel glass-card-sm" id="sponsor-carousel">
+                        <div class="sponsor-track" id="sponsor-track">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="sponsor-nav">
+                            <button class="sponsor-nav-btn" id="sponsor-prev">&#8249;</button>
+                            <div class="sponsor-dots" id="sponsor-dots"></div>
+                            <button class="sponsor-nav-btn" id="sponsor-next">&#8250;</button>
+                        </div>
+                    </div>
+
+                    <!-- Organizer: manage sponsors -->
+                    <div id="sponsor-manage" class="mt-3" hidden>
+                        <h4 style="font-size:0.9rem;margin-bottom:0.75rem;">Gerenciar Patrocinadores</h4>
+                        <div class="config-panel">
+                            <div class="form-group">
+                                <label for="sponsor-name">Nome</label>
+                                <input type="text" id="sponsor-name" class="form-input" placeholder="Nome do patrocinador">
+                            </div>
+                            <div class="form-group">
+                                <label for="sponsor-link">Link</label>
+                                <input type="url" id="sponsor-link" class="form-input" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label for="sponsor-image">URL da imagem</label>
+                                <input type="url" id="sponsor-image" class="form-input" placeholder="https://...imagem.png">
+                            </div>
+                            <button class="btn btn-success btn-sm" id="btn-add-sponsor">+ Adicionar Patrocinador</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Edit Modal -->
+            <div class="modal-overlay" id="score-modal">
+                <div class="modal-box" style="text-align:left;">
+                    <h3>&#9917; Registrar Resultado</h3>
+                    <p id="score-match-label" class="text-muted mb-3"></p>
+                    <div class="config-panel">
+                        <div class="config-row">
+                            <div class="form-group">
+                                <label id="score-team1-label">Time 1</label>
+                                <input type="number" id="score-home1" class="form-input" min="0" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label id="score-team2-label">Time 2</label>
+                                <input type="number" id="score-home2" class="form-input" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div id="away-scores" hidden>
+                            <p class="text-muted mb-2" style="font-size:0.8rem;">Volta</p>
+                            <div class="config-row">
+                                <div class="form-group">
+                                    <label>Time 1 (volta)</label>
+                                    <input type="number" id="score-away1" class="form-input" min="0" placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Time 2 (volta)</label>
+                                    <input type="number" id="score-away2" class="form-input" min="0" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-2" style="font-size:0.8rem;">Pênaltis (se empate)</p>
+                            <div class="config-row">
+                                <div class="form-group">
+                                    <label>Pênaltis Time 1</label>
+                                    <input type="number" id="score-pen1" class="form-input" min="0" placeholder="—">
+                                </div>
+                                <div class="form-group">
+                                    <label>Pênaltis Time 2</label>
+                                    <input type="number" id="score-pen2" class="form-input" min="0" placeholder="—">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="score-datetime">Data e hora</label>
+                            <input type="datetime-local" id="score-datetime" class="form-input">
+                        </div>
+                    </div>
+                    <div class="modal-actions mt-3">
+                        <button class="btn" id="score-cancel">Cancelar</button>
+                        <button class="btn btn-primary" id="score-save">Salvar Resultado</button>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-muted mt-4" style="font-size:0.8rem;">&copy; 2026 Psyzon Company</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/chaveamento.js"></script>
+</body>
+
+</html>
