@@ -4,399 +4,554 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Psyzon Stream - Plataforma de streaming P2P para conteúdo autorizado via WebTorrent.">
-    <title>Psyzon Stream - Streaming P2P de Conteúdo Autorizado</title>
-
-    <!-- Preconnect para fontes do Google -->
+    <meta name="description" content="Copa Psyzon - Plataforma de torneios e campeonatos de jogos">
+    <title>Copa Psyzon - Torneios &amp; Campeonatos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Folha de estilos principal -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-
-    <!-- Favicon SVG com ícone de play em gradiente roxo/azul -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Cpolygon points='12,8 12,24 26,16' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='2' y='26' font-size='28'%3E%F0%9F%8F%86%3C/text%3E%3C/svg%3E">
 </head>
 
 <body>
+    <div id="app">
 
-    <!-- ========================================
-         CABEÇALHO PRINCIPAL
-    ========================================= -->
-    <header class="site-header">
-        <div class="header-brand">
-            <div class="brand-icon" aria-hidden="true">
-                <i data-lucide="play" aria-hidden="true"></i>
-            </div>
-            <div class="brand-text">
-                <h1 class="brand-name">Psyzon Stream</h1>
-                <p class="brand-subtitle">Streaming P2P de Conteúdo Autorizado</p>
-            </div>
-        </div>
-    </header>
-
-    <main>
-
-        <!-- ========================================
-             SEÇÃO DE ENTRADA - Magnet link / Torrent
-        ========================================= -->
-        <section id="input-section" class="card input-card" aria-label="Entrada de torrent ou YouTube">
-            <div class="input-row">
-                <div class="input-field">
-                    <label for="magnet-input" class="sr-only">Magnet link ou link do YouTube</label>
-                    <i data-lucide="link" class="input-icon" aria-hidden="true"></i>
-                    <input
-                        type="text"
-                        id="magnet-input"
-                        class="text-input"
-                        placeholder="Cole um magnet link ou link do YouTube aqui..."
-                        aria-label="Cole um magnet link ou link do YouTube aqui"
-                    >
+        <!-- ==================== TELA 1: LANDING ==================== -->
+        <section id="screen-landing" class="screen active">
+            <div class="landing-container">
+                <div class="landing-logo">
+                    <span class="trophy-icon">&#127942;</span>
+                    <h1 class="landing-title">COPA <span class="highlight">PSYZON</span></h1>
+                    <p class="landing-subtitle">Plataforma de Torneios &amp; Campeonatos</p>
                 </div>
 
-                <div class="input-file-wrapper">
-                    <label for="torrent-file" class="btn btn-file" aria-label="Selecionar arquivo .torrent">
-                        <i data-lucide="file-up" aria-hidden="true"></i>
-                        <span>.torrent</span>
+                <div class="game-modes">
+                    <button class="game-mode-btn active" data-mode="fifa">
+                        <span class="mode-icon">&#9917;</span>
+                        <span class="mode-name">FIFA</span>
+                        <span class="mode-status active">Ativo</span>
+                    </button>
+                    <button class="game-mode-btn disabled" data-mode="cs" disabled>
+                        <span class="mode-icon">&#127918;</span>
+                        <span class="mode-name">Counter-Strike</span>
+                        <span class="mode-status">Em breve</span>
+                    </button>
+                    <button class="game-mode-btn disabled" data-mode="sinuca" disabled>
+                        <span class="mode-icon">&#127921;</span>
+                        <span class="mode-name">Sinuca</span>
+                        <span class="mode-status">Em breve</span>
+                    </button>
+                </div>
+
+                <div class="role-buttons">
+                    <button class="role-btn role-organizer" id="btn-enter-organizer">
+                        <span class="role-icon">&#128736;</span>
+                        <span class="role-label">Organizador</span>
+                        <span class="role-desc">Gerenciar torneios</span>
+                    </button>
+                    <button class="role-btn role-participant" id="btn-enter-participant">
+                        <span class="role-icon">&#127919;</span>
+                        <span class="role-label">Participante</span>
+                        <span class="role-desc">Entrar com c&oacute;digo de sala</span>
+                    </button>
+                    <button class="role-btn role-visitor" id="btn-enter-visitor">
+                        <span class="role-icon">&#128065;</span>
+                        <span class="role-label">Visitante</span>
+                        <span class="role-desc">Acompanhar torneios</span>
+                    </button>
+                </div>
+
+                <p class="landing-footer">&copy; 2026 Psyzon Company</p>
+            </div>
+        </section>
+
+        <!-- ==================== TELA 2: CODIGO DA SALA ==================== -->
+        <section id="screen-room-code" class="screen">
+            <div class="screen-container">
+                <button class="btn-back" id="btn-back-room">&#8592; Voltar</button>
+                <div class="room-code-box">
+                    <span class="trophy-icon small">&#127919;</span>
+                    <h2>Entrar na Sala</h2>
+                    <p>Digite o c&oacute;digo de 4 d&iacute;gitos fornecido pelo organizador</p>
+                    <div class="code-input-group">
+                        <input type="text" id="input-room-code" class="code-input" maxlength="4" placeholder="0000" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <button class="btn btn-primary btn-lg" id="btn-join-room">Entrar</button>
+                    <p id="room-code-error" class="error-text" hidden>C&oacute;digo inv&aacute;lido. Tente novamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TELA 3: CADASTRO PARTICIPANTE ==================== -->
+        <section id="screen-register" class="screen">
+            <div class="screen-container">
+                <button class="btn-back" id="btn-back-register">&#8592; Voltar</button>
+                <div class="register-box">
+                    <h2>&#128221; Cadastro do Participante</h2>
+                    <p class="register-subtitle">Preencha seus dados para participar do torneio</p>
+
+                    <div class="cpf-search">
+                        <label for="search-cpf">Buscar cadastro anterior por CPF:</label>
+                        <div class="inline-group">
+                            <input type="text" id="search-cpf" class="form-input" placeholder="000.000.000-00" maxlength="14">
+                            <button class="btn btn-secondary" id="btn-search-cpf">Buscar</button>
+                        </div>
+                        <p id="cpf-search-result" class="info-text" hidden></p>
+                    </div>
+
+                    <hr class="divider">
+
+                    <form id="form-register" autocomplete="off">
+                        <div class="form-row">
+                            <div class="photo-upload">
+                                <label for="input-photo" class="photo-label">
+                                    <div class="photo-preview" id="photo-preview">
+                                        <span>&#128247;</span>
+                                        <small>Foto</small>
+                                    </div>
+                                </label>
+                                <input type="file" id="input-photo" accept="image/*" hidden>
+                            </div>
+                            <div class="form-fields-col">
+                                <div class="form-group">
+                                    <label for="reg-name">Nome Completo *</label>
+                                    <input type="text" id="reg-name" class="form-input" required placeholder="Seu nome completo">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-nick">Nick (exibido na tabela) *</label>
+                                    <input type="text" id="reg-nick" class="form-input" required placeholder="Seu apelido no torneio">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-grid">
+                            <div class="form-group">
+                                <label for="reg-cpf">CPF *</label>
+                                <input type="text" id="reg-cpf" class="form-input" required placeholder="000.000.000-00" maxlength="14">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-flag">Sele&ccedil;&atilde;o / Bandeira</label>
+                                <select id="reg-flag" class="form-input">
+                                    <option value="&#127463;&#127479;">&#127463;&#127479; Brasil</option>
+                                    <option value="&#127462;&#127479;">&#127462;&#127479; Argentina</option>
+                                    <option value="&#127467;&#127479;">&#127467;&#127479; Fran&ccedil;a</option>
+                                    <option value="&#127465;&#127466;">&#127465;&#127466; Alemanha</option>
+                                    <option value="&#127466;&#127480;">&#127466;&#127480; Espanha</option>
+                                    <option value="&#127470;&#127481;">&#127470;&#127481; It&aacute;lia</option>
+                                    <option value="&#127477;&#127481;">&#127477;&#127481; Portugal</option>
+                                    <option value="&#127468;&#127463;">&#127468;&#127463; Inglaterra</option>
+                                    <option value="&#127475;&#127473;">&#127475;&#127473; Holanda</option>
+                                    <option value="&#127463;&#127466;">&#127463;&#127466; B&eacute;lgica</option>
+                                    <option value="&#127469;&#127479;">&#127469;&#127479; Cro&aacute;cia</option>
+                                    <option value="&#127482;&#127486;">&#127482;&#127486; Uruguai</option>
+                                    <option value="&#127467;&#127470;">&#127467;&#127470; Finl&acirc;ndia</option>
+                                    <option value="&#127472;&#127479;">&#127472;&#127479; Coreia do Sul</option>
+                                    <option value="&#127471;&#127477;">&#127471;&#127477; Jap&atilde;o</option>
+                                    <option value="&#127474;&#127485;">&#127474;&#127485; M&eacute;xico</option>
+                                    <option value="&#127482;&#127480;">&#127482;&#127480; EUA</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-grid">
+                            <div class="form-group">
+                                <label for="reg-instagram">Instagram</label>
+                                <input type="text" id="reg-instagram" class="form-input" placeholder="@seuinstagram">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-whatsapp">WhatsApp</label>
+                                <input type="text" id="reg-whatsapp" class="form-input" placeholder="(00) 00000-0000" maxlength="15">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">Confirmar Cadastro</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TELA 4: PAINEL DO ORGANIZADOR ==================== -->
+        <section id="screen-organizer" class="screen">
+            <div class="organizer-container">
+                <header class="organizer-header">
+                    <div class="org-header-left">
+                        <span class="trophy-icon small">&#127942;</span>
+                        <h1>COPA PSYZON</h1>
+                    </div>
+                    <div class="org-header-right">
+                        <button class="btn btn-sm btn-secondary" id="btn-backup">&#128190; Backup</button>
+                        <button class="btn btn-sm btn-secondary" id="btn-restore">&#128194; Restaurar</button>
+                        <input type="file" id="input-restore" accept=".json" hidden>
+                        <button class="btn btn-sm btn-danger" id="btn-logout">&#128682; Sair</button>
+                    </div>
+                </header>
+
+                <nav class="org-tabs">
+                    <button class="tab-btn active" data-tab="tab-setup">&#9881; Configura&ccedil;&atilde;o</button>
+                    <button class="tab-btn" data-tab="tab-teams">&#128101; Times</button>
+                    <button class="tab-btn" data-tab="tab-bracket">&#127942; Chaveamento</button>
+                    <button class="tab-btn" data-tab="tab-results">&#128203; Resultados</button>
+                    <button class="tab-btn" data-tab="tab-stats">&#128200; Estat&iacute;sticas</button>
+                    <button class="tab-btn" data-tab="tab-history">&#128214; Hist&oacute;rico</button>
+                </nav>
+
+                <!-- TAB: Configuracao -->
+                <div class="tab-content active" id="tab-setup">
+                    <div class="card">
+                        <h3>Configura&ccedil;&atilde;o do Torneio</h3>
+                        <div class="form-row-grid">
+                            <div class="form-group">
+                                <label for="tournament-name">Nome do Torneio</label>
+                                <input type="text" id="tournament-name" class="form-input" placeholder="Ex: Copa Psyzon 2026">
+                            </div>
+                            <div class="form-group">
+                                <label for="tournament-teams">Quantidade de Times</label>
+                                <select id="tournament-teams" class="form-input">
+                                    <option value="4">4 times</option>
+                                    <option value="8" selected>8 times</option>
+                                    <option value="16">16 times</option>
+                                    <option value="32">32 times</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row-grid">
+                            <div class="form-group">
+                                <label for="tournament-prize">Premia&ccedil;&atilde;o</label>
+                                <input type="text" id="tournament-prize" class="form-input" placeholder="Ex: R$ 500,00 + Troféu">
+                            </div>
+                            <div class="form-group toggle-group">
+                                <label>Modo Casa e Fora (Ida e Volta)</label>
+                                <label class="toggle">
+                                    <input type="checkbox" id="tournament-home-away">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label" id="home-away-label">Desativado</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="room-code-display">
+                            <label>C&oacute;digo da Sala</label>
+                            <div class="code-display-row">
+                                <span class="code-value" id="display-room-code">----</span>
+                                <button class="btn btn-sm btn-secondary" id="btn-new-code">&#128260; Gerar Novo</button>
+                                <button class="btn btn-sm btn-secondary" id="btn-copy-code">&#128203; Copiar</button>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" id="btn-save-setup">&#128190; Salvar Configura&ccedil;&atilde;o</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Times -->
+                <div class="tab-content" id="tab-teams">
+                    <div class="card">
+                        <div class="card-header-row">
+                            <h3>Gerenciar Times</h3>
+                            <span class="badge" id="teams-count-badge">0 / 8</span>
+                        </div>
+                        <div class="add-team-form">
+                            <div class="inline-group">
+                                <input type="text" id="new-team-name" class="form-input" placeholder="Nome do time">
+                                <select id="new-team-flag" class="form-input form-input-sm">
+                                    <option value="&#127463;&#127479;">&#127463;&#127479;</option>
+                                    <option value="&#127462;&#127479;">&#127462;&#127479;</option>
+                                    <option value="&#127467;&#127479;">&#127467;&#127479;</option>
+                                    <option value="&#127465;&#127466;">&#127465;&#127466;</option>
+                                    <option value="&#127466;&#127480;">&#127466;&#127480;</option>
+                                    <option value="&#127470;&#127481;">&#127470;&#127481;</option>
+                                    <option value="&#127477;&#127481;">&#127477;&#127481;</option>
+                                    <option value="&#127468;&#127463;">&#127468;&#127463;</option>
+                                    <option value="&#127475;&#127473;">&#127475;&#127473;</option>
+                                    <option value="&#127463;&#127466;">&#127463;&#127466;</option>
+                                    <option value="&#127469;&#127479;">&#127469;&#127479;</option>
+                                    <option value="&#127482;&#127486;">&#127482;&#127486;</option>
+                                    <option value="&#127482;&#127480;">&#127482;&#127480;</option>
+                                </select>
+                                <button class="btn btn-primary" id="btn-add-team">+ Adicionar</button>
+                            </div>
+                        </div>
+                        <div class="teams-list" id="teams-list">
+                            <p class="empty-state">Nenhum time cadastrado ainda.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Chaveamento -->
+                <div class="tab-content" id="tab-bracket">
+                    <div class="card">
+                        <div class="card-header-row">
+                            <h3>Chaveamento</h3>
+                            <div class="bracket-actions">
+                                <button class="btn btn-sm btn-secondary" id="btn-shuffle">&#128256; Embaralhar</button>
+                                <button class="btn btn-sm btn-primary" id="btn-generate-bracket">&#9889; Gerar Chaveamento</button>
+                            </div>
+                        </div>
+                        <div class="bracket-view-toggle">
+                            <button class="view-btn active" id="btn-view-tree" data-view="tree">&#127795; &Aacute;rvore</button>
+                            <button class="view-btn" id="btn-view-list" data-view="list">&#128203; Lista</button>
+                        </div>
+                        <div class="bracket-container" id="bracket-container">
+                            <p class="empty-state">Configure o torneio e gere o chaveamento para come&ccedil;ar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Resultados -->
+                <div class="tab-content" id="tab-results">
+                    <div class="card">
+                        <h3>Registrar Resultados</h3>
+                        <div class="matches-list" id="matches-list">
+                            <p class="empty-state">Gere o chaveamento primeiro para ver as partidas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Estatisticas -->
+                <div class="tab-content" id="tab-stats">
+                    <div class="card">
+                        <h3>&#128200; Ranking de Jogadores</h3>
+                        <div class="stats-table-container">
+                            <table class="stats-table" id="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Jogador</th>
+                                        <th>&#127942;</th>
+                                        <th>Finais</th>
+                                        <th>Semis</th>
+                                        <th>Gols</th>
+                                        <th>GC</th>
+                                        <th>SG</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stats-body">
+                                    <tr><td colspan="8" class="empty-state">Nenhuma estat&iacute;stica dispon&iacute;vel.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Historico -->
+                <div class="tab-content" id="tab-history">
+                    <div class="card">
+                        <div class="card-header-row">
+                            <h3>&#128214; Hist&oacute;rico de Torneios</h3>
+                            <button class="btn btn-sm btn-danger" id="btn-end-tournament">&#128683; Encerrar Torneio Atual</button>
+                        </div>
+                        <div class="history-list" id="history-list">
+                            <p class="empty-state">Nenhum torneio encerrado ainda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TELA 5: VISITOR ==================== -->
+        <section id="screen-visitor" class="screen">
+            <div class="visitor-container">
+                <header class="visitor-header">
+                    <div class="org-header-left">
+                        <span class="trophy-icon small">&#127942;</span>
+                        <h1>COPA PSYZON</h1>
+                        <span class="badge badge-visitor">Visitante</span>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="btn-visitor-back">&#8592; Voltar</button>
+                </header>
+
+                <nav class="org-tabs">
+                    <button class="tab-btn active" data-tab="vtab-bracket">&#127942; Chaveamento</button>
+                    <button class="tab-btn" data-tab="vtab-ranking">&#128200; Ranking</button>
+                    <button class="tab-btn" data-tab="vtab-history">&#128214; Hist&oacute;rico</button>
+                </nav>
+
+                <div class="tab-content active" id="vtab-bracket">
+                    <div class="card">
+                        <h3>Chaveamento do Torneio</h3>
+                        <div class="bracket-container" id="visitor-bracket-container">
+                            <p class="empty-state">Nenhum torneio ativo no momento.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="vtab-ranking">
+                    <div class="card">
+                        <h3>&#128200; Ranking</h3>
+                        <div class="stats-table-container">
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Jogador</th>
+                                        <th>&#127942;</th>
+                                        <th>Finais</th>
+                                        <th>Semis</th>
+                                        <th>Gols</th>
+                                        <th>GC</th>
+                                        <th>SG</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="visitor-stats-body">
+                                    <tr><td colspan="8" class="empty-state">Nenhuma estat&iacute;stica dispon&iacute;vel.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="vtab-history">
+                    <div class="card">
+                        <h3>&#128214; Hist&oacute;rico de Campe&otilde;es</h3>
+                        <div class="history-list" id="visitor-history-list">
+                            <p class="empty-state">Nenhum torneio encerrado ainda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TELA 6: PARTICIPANTE VIEW ==================== -->
+        <section id="screen-participant-view" class="screen">
+            <div class="visitor-container">
+                <header class="visitor-header">
+                    <div class="org-header-left">
+                        <span class="trophy-icon small">&#127942;</span>
+                        <h1>COPA PSYZON</h1>
+                        <span class="badge badge-participant">Participante</span>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="btn-participant-back">&#8592; Sair</button>
+                </header>
+
+                <div class="participant-info-bar" id="participant-info-bar">
+                    <!-- Populated by JS -->
+                </div>
+
+                <nav class="org-tabs">
+                    <button class="tab-btn active" data-tab="ptab-bracket">&#127942; Chaveamento</button>
+                    <button class="tab-btn" data-tab="ptab-ranking">&#128200; Ranking</button>
+                </nav>
+
+                <div class="tab-content active" id="ptab-bracket">
+                    <div class="card">
+                        <h3>Chaveamento do Torneio</h3>
+                        <div class="bracket-container" id="participant-bracket-container">
+                            <p class="empty-state">O chaveamento ainda n&atilde;o foi gerado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="ptab-ranking">
+                    <div class="card">
+                        <h3>&#128200; Ranking</h3>
+                        <div class="stats-table-container">
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Jogador</th>
+                                        <th>&#127942;</th>
+                                        <th>Finais</th>
+                                        <th>Semis</th>
+                                        <th>Gols</th>
+                                        <th>GC</th>
+                                        <th>SG</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="participant-stats-body">
+                                    <tr><td colspan="8" class="empty-state">Nenhuma estat&iacute;stica dispon&iacute;vel.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MODAL: Jogadores do Time ==================== -->
+        <div id="modal-players" class="modal-overlay" hidden>
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h3 id="modal-players-title">Jogadores do Time</h3>
+                    <button class="btn-close" id="btn-close-players">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-player-form">
+                        <div class="inline-group">
+                            <input type="text" id="new-player-name" class="form-input" placeholder="Nome do jogador">
+                            <input type="text" id="new-player-nick" class="form-input" placeholder="Nick">
+                            <button class="btn btn-primary" id="btn-add-player">+ Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="players-list" id="modal-players-list">
+                        <p class="empty-state">Nenhum jogador neste time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL: Resultado da Partida ==================== -->
+        <div id="modal-result" class="modal-overlay" hidden>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-result-title">Resultado</h3>
+                    <button class="btn-close" id="btn-close-result">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="result-teams">
+                        <span class="result-team-name" id="result-team1">Time 1</span>
+                        <span class="result-vs">VS</span>
+                        <span class="result-team-name" id="result-team2">Time 2</span>
+                    </div>
+
+                    <div class="result-section">
+                        <h4>Jogo de Ida</h4>
+                        <div class="score-input-row">
+                            <input type="number" id="score-home-1" class="score-input" min="0" value="0">
+                            <span class="score-x">&times;</span>
+                            <input type="number" id="score-home-2" class="score-input" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="result-section" id="away-section" hidden>
+                        <h4>Jogo de Volta</h4>
+                        <div class="score-input-row">
+                            <input type="number" id="score-away-1" class="score-input" min="0" value="0">
+                            <span class="score-x">&times;</span>
+                            <input type="number" id="score-away-2" class="score-input" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="result-section" id="penalty-section" hidden>
+                        <h4>P&ecirc;naltis</h4>
+                        <div class="score-input-row">
+                            <input type="number" id="score-pen-1" class="score-input" min="0" value="0">
+                            <span class="score-x">&times;</span>
+                            <input type="number" id="score-pen-2" class="score-input" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <label class="toggle penalty-toggle">
+                        <input type="checkbox" id="toggle-penalties">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Houve p&ecirc;naltis?</span>
                     </label>
-                    <input
-                        type="file"
-                        id="torrent-file"
-                        accept=".torrent"
-                        class="sr-only"
-                        aria-label="Selecionar arquivo torrent"
-                    >
-                </div>
 
-                <button id="btn-start" class="btn btn-primary" aria-label="Iniciar streaming">
-                    <i data-lucide="play" aria-hidden="true"></i>
-                    <span>Iniciar</span>
-                </button>
-
-                <button id="btn-clear" class="btn btn-secondary" aria-label="Limpar entrada">
-                    <i data-lucide="x" aria-hidden="true"></i>
-                    <span>Limpar</span>
-                </button>
-            </div>
-
-            <!-- Indicador de status atual -->
-            <div id="status-indicator" class="status-indicator" aria-live="polite">
-                <span class="status-dot" data-status="idle"></span>
-                <span id="status-text" class="status-text">Aguardando entrada...</span>
-            </div>
-        </section>
-
-        <!-- ========================================
-             CONTEÚDO PRINCIPAL - Player + Arquivos
-        ========================================= -->
-        <section id="main-content" class="main-content" hidden aria-label="Conteúdo principal">
-            <div class="content-grid">
-
-                <!-- Coluna Esquerda - Player de Vídeo -->
-                <div id="player-section" class="player-section">
-                    <div class="video-container" data-state="idle">
-
-                        <!-- Elemento de vídeo HTML5 -->
-                        <video
-                            id="video-player"
-                            class="video-player"
-                            preload="auto"
-                            aria-label="Player de vídeo"
-                        ></video>
-
-                        <!-- Overlay quando nenhum vídeo está selecionado -->
-                        <div id="player-overlay" class="player-overlay">
-                            <i data-lucide="film" aria-hidden="true"></i>
-                            <p>Selecione um vídeo para reproduzir</p>
-                        </div>
-
-                        <!-- Overlay de buffering / carregamento -->
-                        <div id="buffering-overlay" class="buffering-overlay" hidden>
-                            <div class="spinner" aria-hidden="true"></div>
-                            <p>Carregando buffer...</p>
-                        </div>
-
-                        <!-- Controles customizados do player -->
-                        <div class="player-controls" aria-label="Controles do player">
-                            <div class="controls-row controls-row--progress">
-                                <div class="progress-container" id="progress-container" role="slider" aria-label="Progresso do vídeo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-                                    <div class="progress-buffer" id="progress-buffer"></div>
-                                    <div class="progress-bar" id="progress-bar"></div>
-                                    <div class="progress-handle" id="progress-handle"></div>
-                                </div>
-                            </div>
-
-                            <div class="controls-row controls-row--buttons">
-                                <!-- Grupo esquerdo: play, retroceder, avançar, tempo -->
-                                <div class="controls-group controls-group--left">
-                                    <button id="btn-play-pause" class="control-btn" aria-label="Reproduzir / Pausar">
-                                        <i data-lucide="play" aria-hidden="true"></i>
-                                    </button>
-                                    <button id="btn-rewind" class="control-btn" aria-label="Retroceder 10 segundos">
-                                        <i data-lucide="rewind" aria-hidden="true"></i>
-                                    </button>
-                                    <button id="btn-forward" class="control-btn" aria-label="Avançar 10 segundos">
-                                        <i data-lucide="fast-forward" aria-hidden="true"></i>
-                                    </button>
-                                    <div class="time-display" aria-label="Tempo de reprodução">
-                                        <span id="current-time">0:00</span>
-                                        <span class="time-separator">/</span>
-                                        <span id="duration">0:00</span>
-                                    </div>
-                                </div>
-
-                                <!-- Grupo direito: volume, velocidade, tela cheia -->
-                                <div class="controls-group controls-group--right">
-                                    <div class="volume-control">
-                                        <button id="btn-volume" class="control-btn" aria-label="Volume">
-                                            <i data-lucide="volume-2" aria-hidden="true"></i>
-                                        </button>
-                                        <input
-                                            type="range"
-                                            id="volume-slider"
-                                            class="volume-slider"
-                                            min="0"
-                                            max="1"
-                                            step="0.05"
-                                            value="1"
-                                            aria-label="Controle de volume"
-                                        >
-                                    </div>
-
-                                    <div class="speed-control">
-                                        <select id="speed-selector" class="speed-selector" aria-label="Velocidade de reprodução">
-                                            <option value="0.5">0.5x</option>
-                                            <option value="1" selected>1x</option>
-                                            <option value="1.5">1.5x</option>
-                                            <option value="2">2x</option>
-                                        </select>
-                                    </div>
-
-                                    <button id="btn-fullscreen" class="control-btn" aria-label="Tela cheia">
-                                        <i data-lucide="maximize" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary btn-lg btn-block" id="btn-save-result">Salvar Resultado</button>
                     </div>
-
-                    <!-- Informações do arquivo em reprodução -->
-                    <div class="now-playing">
-                        <div class="now-playing-info">
-                            <span id="now-playing-name" class="now-playing-name">Nenhum vídeo selecionado</span>
-                        </div>
-                        <span class="badge badge-streaming">
-                            <i data-lucide="wifi" aria-hidden="true"></i>
-                            Reproduzindo trechos já baixados
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Coluna Direita - Lista de Arquivos -->
-                <div id="files-section" class="files-section">
-                    <div class="card files-card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i data-lucide="folder-open" aria-hidden="true"></i>
-                                Arquivos do Torrent
-                            </h2>
-                        </div>
-                        <ul id="file-list" class="file-list" aria-label="Lista de arquivos do torrent">
-                            <!-- Itens de arquivo são inseridos dinamicamente pelo JS -->
-                            <!-- Estrutura de cada item:
-                            <li class="file-item" data-file-index="0">
-                                <div class="file-item-icon">
-                                    <i data-lucide="video"></i>
-                                </div>
-                                <div class="file-item-info">
-                                    <span class="file-item-name" title="nome-completo.mp4">nome-completo.mp4</span>
-                                    <span class="file-item-size">250 MB</span>
-                                    <div class="file-item-progress">
-                                        <div class="file-item-progress-bar" data-progress="0"></div>
-                                    </div>
-                                    <span class="file-item-percent">0%</span>
-                                </div>
-                                <div class="file-item-actions">
-                                    <button class="btn btn-sm btn-play" aria-label="Reproduzir">
-                                        <i data-lucide="play"></i> Reproduzir
-                                    </button>
-                                    <span class="badge badge-ready" hidden>Pronto</span>
-                                </div>
-                            </li>
-                            -->
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ========================================
-             PAINEL DE DOWNLOAD - Estatísticas
-        ========================================= -->
-        <section id="download-panel" class="card download-panel" hidden aria-label="Estatísticas de download">
-            <div class="stats-grid">
-                <!-- Progresso Geral -->
-                <div class="stat-item stat-item--wide">
-                    <div class="stat-label">
-                        <i data-lucide="bar-chart-3" aria-hidden="true"></i>
-                        Progresso Geral
-                    </div>
-                    <div class="stat-progress-container">
-                        <div class="stat-progress-bar" id="overall-progress-bar" data-progress="0"></div>
-                    </div>
-                    <div class="stat-value" id="overall-progress-text">0%</div>
-                </div>
-
-                <!-- Velocidade de Download -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="download" aria-hidden="true"></i>
-                        Velocidade Download
-                    </div>
-                    <div class="stat-value" id="download-speed">0 KB/s</div>
-                </div>
-
-                <!-- Velocidade de Upload -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="upload" aria-hidden="true"></i>
-                        Velocidade Upload
-                    </div>
-                    <div class="stat-value" id="upload-speed">0 KB/s</div>
-                </div>
-
-                <!-- Peers Conectados -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="users" aria-hidden="true"></i>
-                        Peers Conectados
-                    </div>
-                    <div class="stat-value" id="peers-count">0</div>
-                </div>
-
-                <!-- Tamanho Total -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="hard-drive" aria-hidden="true"></i>
-                        Tamanho Total
-                    </div>
-                    <div class="stat-value" id="total-size">0 MB</div>
-                </div>
-
-                <!-- Tamanho Baixado -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="database" aria-hidden="true"></i>
-                        Tamanho Baixado
-                    </div>
-                    <div class="stat-value" id="downloaded-size">0 MB</div>
-                </div>
-
-                <!-- Tempo Restante -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="clock" aria-hidden="true"></i>
-                        Tempo Restante
-                    </div>
-                    <div class="stat-value" id="time-remaining">Calculando...</div>
-                </div>
-
-                <!-- Status -->
-                <div class="stat-item">
-                    <div class="stat-label">
-                        <i data-lucide="activity" aria-hidden="true"></i>
-                        Status
-                    </div>
-                    <div class="stat-value" id="torrent-status">Verificação de peças</div>
                 </div>
             </div>
-        </section>
-
-        <!-- ========================================
-             LOG DE ATIVIDADE
-        ========================================= -->
-        <section id="activity-log" class="card activity-log" hidden aria-label="Log de atividade">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i data-lucide="scroll-text" aria-hidden="true"></i>
-                    Log de Atividade
-                </h2>
-                <button id="btn-clear-log" class="btn btn-sm btn-secondary" aria-label="Limpar log de atividade">
-                    <i data-lucide="trash-2" aria-hidden="true"></i>
-                    <span>Limpar</span>
-                </button>
-            </div>
-            <ul id="log-list" class="log-list" aria-label="Entradas do log">
-                <!-- Entradas de log inseridas dinamicamente pelo JS -->
-                <!-- Estrutura de cada entrada:
-                <li class="log-entry">
-                    <i data-lucide="info" class="log-entry-icon" aria-hidden="true"></i>
-                    <span class="log-entry-time">12:34:56</span>
-                    <span class="log-entry-message">Torrent adicionado com sucesso.</span>
-                </li>
-                -->
-            </ul>
-        </section>
-
-    </main>
-
-    <!-- ========================================
-         RODAPÉ
-    ========================================= -->
-    <footer class="site-footer">
-        <div class="footer-disclaimer">
-            <p>⚠️ Esta plataforma destina-se exclusivamente à distribuição e reprodução de conteúdo legal, próprio, licenciado ou de domínio público.</p>
         </div>
-        <p class="footer-copy">Psyzon Stream &copy; 2026 - Ferramenta para streaming de conteúdo autorizado</p>
-    </footer>
 
-    <!-- ========================================
-         MODAL DE USO RESPONSÁVEL
-    ========================================= -->
-    <div id="disclaimer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
-        <div class="modal-content">
-            <div class="modal-icon" aria-hidden="true">
-                <i data-lucide="shield-alert"></i>
-            </div>
-            <h2 id="modal-title" class="modal-title">Aviso de Uso Responsável</h2>
-            <div class="modal-body">
-                <p>
-                    Esta plataforma utiliza tecnologia WebTorrent para streaming peer-to-peer (P2P) de conteúdo digital.
-                    Ela foi desenvolvida <strong>exclusivamente</strong> para a distribuição e reprodução de:
-                </p>
-                <ul>
-                    <li>Conteúdo próprio e original</li>
-                    <li>Conteúdo licenciado por seus detentores de direitos</li>
-                    <li>Conteúdo de domínio público</li>
-                    <li>Conteúdo sob licenças abertas (Creative Commons, etc.)</li>
-                </ul>
-                <p>
-                    O uso desta ferramenta para distribuir ou acessar conteúdo protegido por direitos autorais sem
-                    a devida autorização é <strong>estritamente proibido</strong> e de inteira responsabilidade do usuário.
-                </p>
-            </div>
-            <button id="btn-accept-disclaimer" class="btn btn-primary btn-lg" aria-label="Aceitar termos de uso">
-                <i data-lucide="check-circle" aria-hidden="true"></i>
-                <span>Entendi e Concordo</span>
-            </button>
+        <!-- Toast Notification -->
+        <div id="toast" class="toast" hidden>
+            <span id="toast-message"></span>
         </div>
     </div>
 
-    <!-- ========================================
-         SCRIPTS
-    ========================================= -->
-    <!-- WebTorrent - Cliente BitTorrent para o navegador -->
-    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-
-    <!-- Lucide Icons - Biblioteca de ícones -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script>lucide.createIcons();</script>
-
-    <!-- Lógica principal da aplicação -->
+    <script src="js/data.js"></script>
+    <script src="js/tournament.js"></script>
     <script src="js/app.js"></script>
-
 </body>
 
 </html>

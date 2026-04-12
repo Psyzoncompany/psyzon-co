@@ -1,1080 +1,989 @@
 /* ==========================================================================
-   PSYZON STREAM — Lógica Principal da Aplicação
-   Aplicação de streaming P2P via WebTorrent com player de vídeo customizado.
+   COPA PSYZON — Controlador Principal da Aplicacao
+   Roteamento de telas, eventos, UI
    ========================================================================== */
 
 (function () {
     'use strict';
 
-    // ======================================================================
-    // 1. CACHE DE ELEMENTOS DOM
-    // ======================================================================
-    const DOM = {
-        // Entrada
-        magnetInput:       document.getElementById('magnet-input'),
-        torrentFileInput:  document.getElementById('torrent-file'),
-        torrentFileLabel:  document.querySelector('label[for="torrent-file"] span'),
-        btnStart:          document.getElementById('btn-start'),
-        btnClear:          document.getElementById('btn-clear'),
+    var Data = CopaPsyzonData;
+    var Engine = CopaPsyzonTournament;
 
-        // Status
-        statusDot:         document.querySelector('.status-dot'),
-        statusText:        document.getElementById('status-text'),
-
-        // Conteudo principal
-        mainContent:       document.getElementById('main-content'),
-
-        // Player de video
-        videoPlayer:       document.getElementById('video-player'),
-        playerOverlay:     document.getElementById('player-overlay'),
-        bufferingOverlay:  document.getElementById('buffering-overlay'),
-        videoContainer:    document.querySelector('.video-container'),
-
-        // Controles do player
-        btnPlayPause:      document.getElementById('btn-play-pause'),
-        btnRewind:         document.getElementById('btn-rewind'),
-        btnForward:        document.getElementById('btn-forward'),
-        currentTime:       document.getElementById('current-time'),
-        duration:          document.getElementById('duration'),
-        progressContainer: document.getElementById('progress-container'),
-        progressBuffer:    document.getElementById('progress-buffer'),
-        progressBar:       document.getElementById('progress-bar'),
-        progressHandle:    document.getElementById('progress-handle'),
-        btnVolume:         document.getElementById('btn-volume'),
-        volumeSlider:      document.getElementById('volume-slider'),
-        speedSelector:     document.getElementById('speed-selector'),
-        btnFullscreen:     document.getElementById('btn-fullscreen'),
-
-        // Informacoes de reproducao
-        nowPlayingName:    document.getElementById('now-playing-name'),
-        streamingBadge:    document.querySelector('.badge-streaming'),
-
-        // Lista de arquivos
-        fileList:          document.getElementById('file-list'),
-        filesSection:      document.getElementById('files-section'),
-
-        // Painel de download
-        downloadPanel:     document.getElementById('download-panel'),
-        overallProgressText: document.getElementById('overall-progress-text'),
-        overallProgressBar:  document.getElementById('overall-progress-bar'),
-        downloadSpeed:     document.getElementById('download-speed'),
-        uploadSpeed:       document.getElementById('upload-speed'),
-        peersCount:        document.getElementById('peers-count'),
-        totalSize:         document.getElementById('total-size'),
-        downloadedSize:    document.getElementById('downloaded-size'),
-        timeRemaining:     document.getElementById('time-remaining'),
-        torrentStatus:     document.getElementById('torrent-status'),
-
-        // Log de atividade
-        activityLog:       document.getElementById('activity-log'),
-        logList:           document.getElementById('log-list'),
-        btnClearLog:       document.getElementById('btn-clear-log'),
-
-        // Modal de disclaimer
-        disclaimerModal:   document.getElementById('disclaimer-modal'),
-        btnAcceptDisclaimer: document.getElementById('btn-accept-disclaimer'),
+    /* ------------------------------------------------------------------
+       Estado da Aplicacao
+    ------------------------------------------------------------------ */
+    var state = {
+        currentScreen: 'screen-landing',
+        currentTab: null,
+        currentMatchId: null,
+        currentTeamId: null,
+        bracketView: 'tree',
+        participantData: null
     };
 
-    // ======================================================================
-    // 2. ESTADO DA APLICACAO
-    // ======================================================================
-    let client = null;
-    let currentTorrent = null;
-    let currentFile = null;
-    let statsInterval = null;
-    let fileProgressInterval = null;
-    let animFrameId = null;
-    let isDraggingProgress = false;
-    const MAX_LOG_ENTRIES = 200;
-    // .mp4 e .webm têm suporte nativo via MediaSource; demais formatos usam
-    // fallback via blob URL e podem não funcionar em todos os navegadores.
-    const VIDEO_EXTENSIONS = [
-        '.mp4', '.webm', '.mkv', '.avi', '.mov', '.m4v', '.ogv',
-        '.flv', '.wmv', '.3gp', '.3g2', '.ts', '.m2ts', '.mts',
-        '.vob', '.f4v', '.divx', '.rmvb', '.rm', '.asf', '.mpg',
-        '.mpeg', '.m2v', '.mxf', '.dv'
-    ];
-
-    // ======================================================================
-    // 3. FUNCOES UTILITARIAS
-    // ======================================================================
-
-    /** Formata bytes em unidade legível (B, KB, MB, GB) */
-    function formatBytes(bytes) {
-        if (bytes === 0 || bytes == null) return '0 B';
-        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const k = 1024;
-        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), units.length - 1);
-        return (bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
+    /* ------------------------------------------------------------------
+       Navegacao entre Telas
+    ------------------------------------------------------------------ */
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(function (s) {
+            s.classList.remove('active');
+        });
+        var target = document.getElementById(screenId);
+        if (target) {
+            target.classList.add('active');
+            state.currentScreen = screenId;
+        }
     }
 
-    /** Formata segundos em MM:SS ou HH:MM:SS */
-    function formatTime(seconds) {
-        if (!isFinite(seconds) || seconds < 0) return '0:00';
-        const s = Math.floor(seconds);
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
-        const sec = s % 60;
-        const secStr = sec.toString().padStart(2, '0');
-        if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + secStr;
-        return m + ':' + secStr;
+    /* ------------------------------------------------------------------
+       Tabs
+    ------------------------------------------------------------------ */
+    function setupTabs() {
+        document.querySelectorAll('.org-tabs').forEach(function (nav) {
+            nav.querySelectorAll('.tab-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var tabId = btn.getAttribute('data-tab');
+                    // Deactivate siblings
+                    nav.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    // Show content
+                    var parent = nav.parentElement;
+                    parent.querySelectorAll('.tab-content').forEach(function (tc) { tc.classList.remove('active'); });
+                    var tab = document.getElementById(tabId);
+                    if (tab) tab.classList.add('active');
+                });
+            });
+        });
     }
 
-    /** Formata tempo restante estimado (milissegundos) */
-    function formatETA(ms) {
-        if (ms == null || !isFinite(ms) || ms <= 0) return 'Calculando...';
-        const totalSec = Math.floor(ms / 1000);
-        if (totalSec < 60) return totalSec + 's';
-        const min = Math.floor(totalSec / 60);
-        const sec = totalSec % 60;
-        if (min < 60) return min + 'm ' + sec + 's';
-        const hours = Math.floor(min / 60);
-        const mins = min % 60;
-        return hours + 'h ' + mins + 'm';
+    /* ------------------------------------------------------------------
+       Toast
+    ------------------------------------------------------------------ */
+    function toast(msg) {
+        var el = document.getElementById('toast');
+        var msgEl = document.getElementById('toast-message');
+        msgEl.textContent = msg;
+        el.hidden = false;
+        el.classList.add('show');
+        setTimeout(function () {
+            el.classList.remove('show');
+            setTimeout(function () { el.hidden = true; }, 300);
+        }, 2500);
     }
 
-    /** Formata velocidade de transferência (bytes/s) */
-    function formatSpeed(bytesPerSec) {
-        if (bytesPerSec === 0 || bytesPerSec == null) return '0 KB/s';
-        if (bytesPerSec >= 1048576) return (bytesPerSec / 1048576).toFixed(1) + ' MB/s';
-        return (bytesPerSec / 1024).toFixed(0) + ' KB/s';
+    /* ------------------------------------------------------------------
+       CPF Mask
+    ------------------------------------------------------------------ */
+    function maskCPF(value) {
+        var digits = value.replace(/\D/g, '').slice(0, 11);
+        if (digits.length <= 3) return digits;
+        if (digits.length <= 6) return digits.slice(0, 3) + '.' + digits.slice(3);
+        if (digits.length <= 9) return digits.slice(0, 3) + '.' + digits.slice(3, 6) + '.' + digits.slice(6);
+        return digits.slice(0, 3) + '.' + digits.slice(3, 6) + '.' + digits.slice(6, 9) + '-' + digits.slice(9);
     }
 
-    /** Verifica se o arquivo é um vídeo */
-    function isVideoFile(filename) {
-        if (!filename) return false;
-        const ext = '.' + filename.split('.').pop().toLowerCase();
-        return VIDEO_EXTENSIONS.includes(ext);
+    function setupCPFMasks() {
+        ['reg-cpf', 'search-cpf'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function () {
+                    el.value = maskCPF(el.value);
+                });
+            }
+        });
     }
 
-    /** Retorna o nome do ícone Lucide para o tipo de arquivo */
-    function getFileIcon(filename) {
-        if (isVideoFile(filename)) return 'video';
-        const ext = filename ? filename.split('.').pop().toLowerCase() : '';
-        const audioExts = ['mp3', 'flac', 'wav', 'ogg', 'aac', 'm4a'];
-        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
-        const docExts = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'];
-        if (audioExts.includes(ext)) return 'music';
-        if (imageExts.includes(ext)) return 'image';
-        if (docExts.includes(ext)) return 'file-text';
-        return 'file';
+    /* ------------------------------------------------------------------
+       Phone Mask
+    ------------------------------------------------------------------ */
+    function setupPhoneMask() {
+        var el = document.getElementById('reg-whatsapp');
+        if (el) {
+            el.addEventListener('input', function () {
+                var d = el.value.replace(/\D/g, '').slice(0, 11);
+                if (d.length <= 2) { el.value = d; return; }
+                if (d.length <= 7) { el.value = '(' + d.slice(0, 2) + ') ' + d.slice(2); return; }
+                el.value = '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+            });
+        }
     }
 
-    /** Escapa HTML para prevenir injeção de conteúdo */
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(str || ''));
+    /* ------------------------------------------------------------------
+       LANDING — Eventos dos Botoes de Perfil
+    ------------------------------------------------------------------ */
+    function setupLanding() {
+        document.getElementById('btn-enter-organizer').addEventListener('click', function () {
+            showScreen('screen-organizer');
+            refreshOrganizerPanel();
+        });
+
+        document.getElementById('btn-enter-participant').addEventListener('click', function () {
+            showScreen('screen-room-code');
+        });
+
+        document.getElementById('btn-enter-visitor').addEventListener('click', function () {
+            showScreen('screen-visitor');
+            refreshVisitorView();
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       ROOM CODE — Entrada por Codigo
+    ------------------------------------------------------------------ */
+    function setupRoomCode() {
+        document.getElementById('btn-back-room').addEventListener('click', function () {
+            showScreen('screen-landing');
+        });
+
+        var input = document.getElementById('input-room-code');
+        input.addEventListener('input', function () {
+            input.value = input.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        document.getElementById('btn-join-room').addEventListener('click', function () {
+            var code = input.value.trim();
+            var tournament = Data.getTournament();
+            var error = document.getElementById('room-code-error');
+
+            if (code === tournament.roomCode && code.length === 4) {
+                error.hidden = true;
+                showScreen('screen-register');
+            } else {
+                error.hidden = false;
+            }
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btn-join-room').click();
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       REGISTRATION — Cadastro do Participante
+    ------------------------------------------------------------------ */
+    function setupRegistration() {
+        document.getElementById('btn-back-register').addEventListener('click', function () {
+            showScreen('screen-room-code');
+        });
+
+        // Photo upload
+        document.getElementById('input-photo').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                var preview = document.getElementById('photo-preview');
+                preview.innerHTML = '<img src="' + ev.target.result + '" alt="Foto">';
+                preview.dataset.photo = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Search by CPF
+        document.getElementById('btn-search-cpf').addEventListener('click', function () {
+            var cpf = document.getElementById('search-cpf').value;
+            var result = document.getElementById('cpf-search-result');
+            var player = Data.findPlayerByCPF(cpf);
+
+            if (player) {
+                document.getElementById('reg-name').value = player.name || '';
+                document.getElementById('reg-nick').value = player.nick || '';
+                document.getElementById('reg-cpf').value = player.cpf || '';
+                document.getElementById('reg-instagram').value = player.instagram || '';
+                document.getElementById('reg-whatsapp').value = player.whatsapp || '';
+                if (player.flag) {
+                    document.getElementById('reg-flag').value = player.flag;
+                }
+                if (player.photo) {
+                    var preview = document.getElementById('photo-preview');
+                    preview.innerHTML = '<img src="' + player.photo + '" alt="Foto">';
+                    preview.dataset.photo = player.photo;
+                }
+                result.textContent = 'Cadastro encontrado! Dados preenchidos.';
+                result.style.color = 'var(--green)';
+                result.hidden = false;
+            } else {
+                result.textContent = 'Nenhum cadastro encontrado com esse CPF.';
+                result.style.color = 'var(--red)';
+                result.hidden = false;
+            }
+        });
+
+        // Form submit
+        document.getElementById('form-register').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var preview = document.getElementById('photo-preview');
+            var playerData = {
+                name: document.getElementById('reg-name').value.trim(),
+                nick: document.getElementById('reg-nick').value.trim(),
+                cpf: document.getElementById('reg-cpf').value.trim(),
+                flag: document.getElementById('reg-flag').value,
+                instagram: document.getElementById('reg-instagram').value.trim(),
+                whatsapp: document.getElementById('reg-whatsapp').value.trim(),
+                photo: preview.dataset.photo || ''
+            };
+
+            if (!playerData.name || !playerData.nick || !playerData.cpf) {
+                var missing = [];
+                if (!playerData.name) missing.push('Nome');
+                if (!playerData.nick) missing.push('Nick');
+                if (!playerData.cpf) missing.push('CPF');
+                toast('Preencha: ' + missing.join(', '));
+                return;
+            }
+
+            // Save to DB
+            Data.savePlayerToDB(playerData);
+            state.participantData = playerData;
+
+            toast('Cadastro realizado com sucesso!');
+            showScreen('screen-participant-view');
+            refreshParticipantView();
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       PARTICIPANT VIEW
+    ------------------------------------------------------------------ */
+    function refreshParticipantView() {
+        var bar = document.getElementById('participant-info-bar');
+        if (state.participantData) {
+            var p = state.participantData;
+            var photoHtml = p.photo ? '<img class="participant-photo" src="' + p.photo + '" alt="Foto">' : '';
+            bar.innerHTML = photoHtml +
+                '<span class="participant-name">' + escapeHtml(p.flag + ' ' + p.nick) + '</span>' +
+                '<span class="participant-nick">' + escapeHtml(p.name) + '</span>';
+        }
+
+        var tournament = Data.getTournament();
+        renderBracketView(document.getElementById('participant-bracket-container'), tournament, false);
+        renderStatsTable(document.getElementById('participant-stats-body'));
+    }
+
+    function setupParticipantView() {
+        document.getElementById('btn-participant-back').addEventListener('click', function () {
+            state.participantData = null;
+            showScreen('screen-landing');
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       ORGANIZER PANEL
+    ------------------------------------------------------------------ */
+    function refreshOrganizerPanel() {
+        var t = Data.getTournament();
+
+        // Setup tab
+        document.getElementById('tournament-name').value = t.name || '';
+        document.getElementById('tournament-teams').value = t.teamCount;
+        document.getElementById('tournament-prize').value = t.prize || '';
+        document.getElementById('tournament-home-away').checked = t.homeAway || false;
+        document.getElementById('home-away-label').textContent = t.homeAway ? 'Ativado' : 'Desativado';
+        document.getElementById('display-room-code').textContent = t.roomCode || '----';
+
+        // Teams
+        refreshTeamsList();
+
+        // Bracket
+        renderBracketView(document.getElementById('bracket-container'), t, true);
+
+        // Results
+        renderMatchesList(t);
+
+        // Stats
+        renderStatsTable(document.getElementById('stats-body'));
+
+        // History
+        renderHistory(document.getElementById('history-list'));
+
+        // Update badge
+        document.getElementById('teams-count-badge').textContent = t.teams.length + ' / ' + t.teamCount;
+    }
+
+    function setupOrganizer() {
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', function () {
+            showScreen('screen-landing');
+        });
+
+        // Home/away toggle
+        document.getElementById('tournament-home-away').addEventListener('change', function () {
+            document.getElementById('home-away-label').textContent = this.checked ? 'Ativado' : 'Desativado';
+        });
+
+        // Save setup
+        document.getElementById('btn-save-setup').addEventListener('click', function () {
+            var t = Data.getTournament();
+            t.name = document.getElementById('tournament-name').value.trim();
+            t.teamCount = parseInt(document.getElementById('tournament-teams').value, 10);
+            t.prize = document.getElementById('tournament-prize').value.trim();
+            t.homeAway = document.getElementById('tournament-home-away').checked;
+            Data.saveTournament(t);
+            document.getElementById('teams-count-badge').textContent = t.teams.length + ' / ' + t.teamCount;
+            toast('Configuração salva!');
+        });
+
+        // Room code
+        document.getElementById('btn-new-code').addEventListener('click', function () {
+            var t = Data.getTournament();
+            t.roomCode = Data.generateRoomCode();
+            Data.saveTournament(t);
+            document.getElementById('display-room-code').textContent = t.roomCode;
+            toast('Novo código gerado: ' + t.roomCode);
+        });
+
+        document.getElementById('btn-copy-code').addEventListener('click', function () {
+            var code = document.getElementById('display-room-code').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(function () {
+                    toast('Código copiado!');
+                });
+            } else {
+                toast('Código: ' + code);
+            }
+        });
+
+        // Add team
+        document.getElementById('btn-add-team').addEventListener('click', function () {
+            var nameInput = document.getElementById('new-team-name');
+            var flagSelect = document.getElementById('new-team-flag');
+            var name = nameInput.value.trim();
+            if (!name) { toast('Digite o nome do time'); return; }
+
+            var t = Data.getTournament();
+            if (t.teams.length >= t.teamCount) {
+                toast('Limite de ' + t.teamCount + ' times atingido!');
+                return;
+            }
+
+            t.teams.push({
+                id: Data.generateId(),
+                name: name,
+                flag: flagSelect.value,
+                players: []
+            });
+            Data.saveTournament(t);
+            nameInput.value = '';
+            refreshTeamsList();
+            document.getElementById('teams-count-badge').textContent = t.teams.length + ' / ' + t.teamCount;
+            toast('Time adicionado!');
+        });
+
+        // Bracket actions
+        document.getElementById('btn-shuffle').addEventListener('click', function () {
+            var t = Data.getTournament();
+            t.teams = Engine.shuffleArray(t.teams);
+            Data.saveTournament(t);
+            refreshTeamsList();
+            toast('Times embaralhados!');
+        });
+
+        document.getElementById('btn-generate-bracket').addEventListener('click', function () {
+            var t = Data.getTournament();
+            if (t.teams.length < 2) {
+                toast('Cadastre pelo menos 2 times!');
+                return;
+            }
+            if (t.teams.length !== t.teamCount) {
+                toast('Cadastre exatamente ' + t.teamCount + ' times! (Atual: ' + t.teams.length + ')');
+                return;
+            }
+            t.bracket = Engine.generateBracket(t.teams);
+            t.status = 'active';
+            Data.saveTournament(t);
+            renderBracketView(document.getElementById('bracket-container'), t, true);
+            renderMatchesList(t);
+            toast('Chaveamento gerado!');
+        });
+
+        // Bracket view toggle
+        document.getElementById('btn-view-tree').addEventListener('click', function () {
+            state.bracketView = 'tree';
+            document.getElementById('btn-view-tree').classList.add('active');
+            document.getElementById('btn-view-list').classList.remove('active');
+            var t = Data.getTournament();
+            renderBracketView(document.getElementById('bracket-container'), t, true);
+        });
+
+        document.getElementById('btn-view-list').addEventListener('click', function () {
+            state.bracketView = 'list';
+            document.getElementById('btn-view-list').classList.add('active');
+            document.getElementById('btn-view-tree').classList.remove('active');
+            var t = Data.getTournament();
+            renderBracketView(document.getElementById('bracket-container'), t, true);
+        });
+
+        // Backup
+        document.getElementById('btn-backup').addEventListener('click', function () {
+            var json = Data.exportBackup();
+            var blob = new Blob([json], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'copa_psyzon_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            toast('Backup baixado!');
+        });
+
+        // Restore
+        document.getElementById('btn-restore').addEventListener('click', function () {
+            document.getElementById('input-restore').click();
+        });
+
+        document.getElementById('input-restore').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                var success = Data.importBackup(ev.target.result);
+                if (success) {
+                    toast('Backup restaurado com sucesso!');
+                    refreshOrganizerPanel();
+                } else {
+                    toast('Erro ao restaurar backup!');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        // End tournament
+        document.getElementById('btn-end-tournament').addEventListener('click', function () {
+            var t = Data.getTournament();
+            if (!t.bracket) {
+                toast('Nenhum torneio ativo para encerrar.');
+                return;
+            }
+
+            var champion = Engine.getChampion(t.bracket, t.teams);
+            t.winner = champion ? champion.name : 'N/A';
+            t.winnerFlag = champion ? champion.flag : '';
+            t.finishedAt = new Date().toISOString();
+
+            // Update stats
+            if (t.bracket) {
+                // Champion stats
+                if (champion) {
+                    Data.updatePlayerStats(champion.name, { trophies: 1 });
+                }
+
+                // Finalists
+                var finalists = Engine.getTeamsAtStage(t.bracket, 'final');
+                finalists.forEach(function (tid) {
+                    var team = t.teams.find(function (tt) { return tt.id === tid; });
+                    if (team) Data.updatePlayerStats(team.name, { finals: 1 });
+                });
+
+                // Semifinalists
+                var semis = Engine.getTeamsAtStage(t.bracket, 'semi');
+                semis.forEach(function (tid) {
+                    var team = t.teams.find(function (tt) { return tt.id === tid; });
+                    if (team) Data.updatePlayerStats(team.name, { semis: 1 });
+                });
+
+                // Goals
+                var tournamentStats = Engine.getTournamentStats(t.bracket, t.homeAway);
+                Object.keys(tournamentStats).forEach(function (tid) {
+                    var ts = tournamentStats[tid];
+                    Data.updatePlayerStats(ts.name, {
+                        goalsScored: ts.goalsScored,
+                        goalsConceded: ts.goalsConceded
+                    });
+                });
+            }
+
+            Data.addToHistory(t);
+            Data.resetTournament();
+            refreshOrganizerPanel();
+            toast('Torneio encerrado e salvo no histórico!');
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       TEAMS LIST
+    ------------------------------------------------------------------ */
+    function refreshTeamsList() {
+        var t = Data.getTournament();
+        var container = document.getElementById('teams-list');
+
+        if (t.teams.length === 0) {
+            container.innerHTML = '<p class="empty-state">Nenhum time cadastrado ainda.</p>';
+            return;
+        }
+
+        container.innerHTML = t.teams.map(function (team) {
+            return '<div class="team-card" data-team-id="' + team.id + '">' +
+                '<span class="team-flag">' + team.flag + '</span>' +
+                '<span class="team-name">' + escapeHtml(team.name) + '</span>' +
+                '<span class="team-players-count">' + team.players.length + ' jogador(es)</span>' +
+                '<div class="team-actions">' +
+                '<button class="btn btn-sm btn-secondary btn-team-players" data-team-id="' + team.id + '">&#128101; Jogadores</button>' +
+                '<button class="btn btn-sm btn-danger btn-team-remove" data-team-id="' + team.id + '">&#128465;</button>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+
+        // Event: remove team
+        container.querySelectorAll('.btn-team-remove').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var id = btn.getAttribute('data-team-id');
+                t.teams = t.teams.filter(function (tt) { return tt.id !== id; });
+                Data.saveTournament(t);
+                refreshTeamsList();
+                document.getElementById('teams-count-badge').textContent = t.teams.length + ' / ' + t.teamCount;
+                toast('Time removido!');
+            });
+        });
+
+        // Event: manage players
+        container.querySelectorAll('.btn-team-players').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var id = btn.getAttribute('data-team-id');
+                openPlayersModal(id);
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       PLAYERS MODAL
+    ------------------------------------------------------------------ */
+    function openPlayersModal(teamId) {
+        state.currentTeamId = teamId;
+        var t = Data.getTournament();
+        var team = t.teams.find(function (tt) { return tt.id === teamId; });
+        if (!team) return;
+
+        document.getElementById('modal-players-title').textContent = 'Jogadores - ' + team.name;
+        document.getElementById('modal-players').hidden = false;
+        refreshPlayersList(team);
+    }
+
+    function refreshPlayersList(team) {
+        var container = document.getElementById('modal-players-list');
+        if (team.players.length === 0) {
+            container.innerHTML = '<p class="empty-state">Nenhum jogador neste time.</p>';
+            return;
+        }
+
+        container.innerHTML = team.players.map(function (p, idx) {
+            return '<div class="player-item">' +
+                '<span class="player-item-name">' + escapeHtml(p.name) + '</span>' +
+                '<span class="player-item-nick">(' + escapeHtml(p.nick) + ')</span>' +
+                '<button class="btn btn-sm btn-danger btn-remove-player" data-idx="' + idx + '">&#128465;</button>' +
+                '</div>';
+        }).join('');
+
+        container.querySelectorAll('.btn-remove-player').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.getAttribute('data-idx'), 10);
+                var t = Data.getTournament();
+                var tm = t.teams.find(function (tt) { return tt.id === state.currentTeamId; });
+                if (tm) {
+                    tm.players.splice(idx, 1);
+                    Data.saveTournament(t);
+                    refreshPlayersList(tm);
+                    refreshTeamsList();
+                }
+            });
+        });
+    }
+
+    function setupPlayersModal() {
+        document.getElementById('btn-close-players').addEventListener('click', function () {
+            document.getElementById('modal-players').hidden = true;
+        });
+
+        document.getElementById('btn-add-player').addEventListener('click', function () {
+            var name = document.getElementById('new-player-name').value.trim();
+            var nick = document.getElementById('new-player-nick').value.trim();
+            if (!name) { toast('Digite o nome do jogador'); return; }
+
+            var t = Data.getTournament();
+            var team = t.teams.find(function (tt) { return tt.id === state.currentTeamId; });
+            if (!team) return;
+
+            team.players.push({ name: name, nick: nick || name });
+            Data.saveTournament(t);
+            document.getElementById('new-player-name').value = '';
+            document.getElementById('new-player-nick').value = '';
+            refreshPlayersList(team);
+            refreshTeamsList();
+            toast('Jogador adicionado!');
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       BRACKET VIEW
+    ------------------------------------------------------------------ */
+    function renderBracketView(container, tournament, interactive) {
+        if (!tournament.bracket) {
+            container.innerHTML = '<p class="empty-state">Configure o torneio e gere o chaveamento para começar.</p>';
+            return;
+        }
+
+        if (state.bracketView === 'tree') {
+            renderBracketTree(container, tournament, interactive);
+        } else {
+            renderBracketList(container, tournament, interactive);
+        }
+    }
+
+    function renderBracketTree(container, tournament, interactive) {
+        var bracket = tournament.bracket;
+        var html = '<div class="bracket-tree">';
+
+        bracket.rounds.forEach(function (round, rIdx) {
+            var roundName = Engine.getRoundName(rIdx, bracket.totalRounds);
+            html += '<div class="bracket-round">';
+            html += '<div class="round-title">' + roundName + '</div>';
+
+            round.forEach(function (match) {
+                var clickable = interactive && match.team1 && match.team2 && !match.played ? ' clickable' : '';
+                var played = match.played ? ' played' : '';
+
+                html += '<div class="bracket-match' + clickable + played + '" data-match-id="' + match.id + '">';
+                html += renderMatchTeam(match.team1, match.scoreHome1, match.scoreAway1, match.winner, match, tournament.homeAway);
+                html += renderMatchTeam(match.team2, match.scoreHome2, match.scoreAway2, match.winner, match, tournament.homeAway);
+                html += '</div>';
+            });
+
+            html += '</div>';
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+        if (interactive) {
+            container.querySelectorAll('.bracket-match.clickable').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    openResultModal(el.getAttribute('data-match-id'));
+                });
+            });
+        }
+    }
+
+    function renderMatchTeam(team, scoreHome, scoreAway, winnerId, match, homeAway) {
+        if (!team) {
+            return '<div class="match-team tbd"><span class="match-team-name">A definir</span></div>';
+        }
+        var isWinner = match.played && winnerId === team.id;
+        var cls = isWinner ? ' winner' : '';
+
+        var scoreText = '';
+        if (match.played) {
+            scoreText = String(scoreHome || 0);
+            if (homeAway && scoreAway !== null) {
+                scoreText += ' (' + (scoreAway || 0) + ')';
+            }
+        }
+
+        return '<div class="match-team' + cls + '">' +
+            '<span class="team-flag">' + team.flag + '</span>' +
+            '<span class="match-team-name">' + escapeHtml(team.name) + '</span>' +
+            (scoreText ? '<span class="match-team-score">' + scoreText + '</span>' : '') +
+            '</div>';
+    }
+
+    function renderBracketList(container, tournament, interactive) {
+        var bracket = tournament.bracket;
+        var html = '<div class="bracket-list">';
+
+        bracket.rounds.forEach(function (round, rIdx) {
+            var roundName = Engine.getRoundName(rIdx, bracket.totalRounds);
+            html += '<div class="bracket-list-round">';
+            html += '<div class="round-title">' + roundName + '</div>';
+            html += '<div class="bracket-list-matches">';
+
+            round.forEach(function (match) {
+                var clickable = interactive && match.team1 && match.team2 && !match.played ? ' clickable' : '';
+                var played = match.played ? ' played' : '';
+
+                var t1Name = match.team1 ? (match.team1.flag + ' ' + escapeHtml(match.team1.name)) : 'A definir';
+                var t2Name = match.team2 ? (match.team2.flag + ' ' + escapeHtml(match.team2.name)) : 'A definir';
+                var score = '';
+
+                if (match.played) {
+                    score = (match.scoreHome1 || 0) + ' x ' + (match.scoreHome2 || 0);
+                } else {
+                    score = 'VS';
+                }
+
+                html += '<div class="list-match' + clickable + played + '" data-match-id="' + match.id + '">' +
+                    '<span class="list-match-team">' + t1Name + '</span>' +
+                    (match.played ?
+                        '<span class="list-match-score">' + score + '</span>' :
+                        '<span class="list-match-vs">' + score + '</span>') +
+                    '<span class="list-match-team right">' + t2Name + '</span>' +
+                    '</div>';
+            });
+
+            html += '</div></div>';
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+        if (interactive) {
+            container.querySelectorAll('.list-match.clickable').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    openResultModal(el.getAttribute('data-match-id'));
+                });
+            });
+        }
+    }
+
+    /* ------------------------------------------------------------------
+       MATCHES LIST (Results Tab)
+    ------------------------------------------------------------------ */
+    function renderMatchesList(tournament) {
+        var container = document.getElementById('matches-list');
+        if (!tournament.bracket) {
+            container.innerHTML = '<p class="empty-state">Gere o chaveamento primeiro para ver as partidas.</p>';
+            return;
+        }
+
+        var html = '';
+        tournament.bracket.rounds.forEach(function (round, rIdx) {
+            var roundName = Engine.getRoundName(rIdx, tournament.bracket.totalRounds);
+            round.forEach(function (match) {
+                if (!match.team1 || !match.team2) return;
+                var completed = match.played ? ' completed' : '';
+                var t1 = match.team1.flag + ' ' + escapeHtml(match.team1.name);
+                var t2 = match.team2.flag + ' ' + escapeHtml(match.team2.name);
+                var score = match.played ? ((match.scoreHome1 || 0) + ' x ' + (match.scoreHome2 || 0)) : 'Pendente';
+
+                html += '<div class="match-result-card' + completed + '" data-match-id="' + match.id + '">' +
+                    '<span class="match-round-label">' + roundName + '</span>' +
+                    '<span class="match-result-teams">' + t1 + ' vs ' + t2 + '</span>' +
+                    '<span class="match-result-score">' + score + '</span>' +
+                    '</div>';
+            });
+        });
+
+        container.innerHTML = html || '<p class="empty-state">Nenhuma partida disponível.</p>';
+
+        container.querySelectorAll('.match-result-card').forEach(function (el) {
+            el.addEventListener('click', function () {
+                openResultModal(el.getAttribute('data-match-id'));
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       RESULT MODAL
+    ------------------------------------------------------------------ */
+    function openResultModal(matchId) {
+        var t = Data.getTournament();
+        if (!t.bracket) return;
+
+        var match = null;
+        t.bracket.rounds.forEach(function (round) {
+            round.forEach(function (m) {
+                if (m.id === matchId) match = m;
+            });
+        });
+
+        if (!match || !match.team1 || !match.team2) return;
+        state.currentMatchId = matchId;
+
+        document.getElementById('result-team1').textContent = match.team1.flag + ' ' + match.team1.name;
+        document.getElementById('result-team2').textContent = match.team2.flag + ' ' + match.team2.name;
+
+        document.getElementById('score-home-1').value = match.scoreHome1 || 0;
+        document.getElementById('score-home-2').value = match.scoreHome2 || 0;
+
+        // Away section
+        var awaySection = document.getElementById('away-section');
+        if (t.homeAway) {
+            awaySection.hidden = false;
+            document.getElementById('score-away-1').value = match.scoreAway1 || 0;
+            document.getElementById('score-away-2').value = match.scoreAway2 || 0;
+        } else {
+            awaySection.hidden = true;
+        }
+
+        // Penalties
+        var hasPenalties = match.penalties1 !== null && match.penalties1 !== undefined;
+        document.getElementById('toggle-penalties').checked = hasPenalties;
+        document.getElementById('penalty-section').hidden = !hasPenalties;
+        document.getElementById('score-pen-1').value = match.penalties1 || 0;
+        document.getElementById('score-pen-2').value = match.penalties2 || 0;
+
+        document.getElementById('modal-result').hidden = false;
+    }
+
+    function setupResultModal() {
+        document.getElementById('btn-close-result').addEventListener('click', function () {
+            document.getElementById('modal-result').hidden = true;
+        });
+
+        document.getElementById('toggle-penalties').addEventListener('change', function () {
+            document.getElementById('penalty-section').hidden = !this.checked;
+        });
+
+        document.getElementById('btn-save-result').addEventListener('click', function () {
+            var t = Data.getTournament();
+            if (!state.currentMatchId || !t.bracket) return;
+
+            var penaltiesOn = document.getElementById('toggle-penalties').checked;
+            var scores = {
+                scoreHome1: parseInt(document.getElementById('score-home-1').value, 10) || 0,
+                scoreHome2: parseInt(document.getElementById('score-home-2').value, 10) || 0
+            };
+
+            if (t.homeAway) {
+                scores.scoreAway1 = parseInt(document.getElementById('score-away-1').value, 10) || 0;
+                scores.scoreAway2 = parseInt(document.getElementById('score-away-2').value, 10) || 0;
+            }
+
+            if (penaltiesOn) {
+                scores.penalties1 = parseInt(document.getElementById('score-pen-1').value, 10) || 0;
+                scores.penalties2 = parseInt(document.getElementById('score-pen-2').value, 10) || 0;
+            }
+
+            Engine.registerResult(t.bracket, state.currentMatchId, scores, t.homeAway);
+            Data.saveTournament(t);
+
+            document.getElementById('modal-result').hidden = true;
+            renderBracketView(document.getElementById('bracket-container'), t, true);
+            renderMatchesList(t);
+            toast('Resultado salvo!');
+
+            // Check if tournament is complete
+            if (Engine.isTournamentComplete(t.bracket)) {
+                var champion = Engine.getChampion(t.bracket, t.teams);
+                if (champion) {
+                    toast('🏆 Campeão: ' + champion.flag + ' ' + champion.name + '!');
+                }
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       STATS TABLE
+    ------------------------------------------------------------------ */
+    function renderStatsTable(tbody) {
+        var stats = Data.getStats();
+        var entries = Object.keys(stats).map(function (key) { return stats[key]; });
+
+        entries.sort(function (a, b) {
+            if (b.trophies !== a.trophies) return b.trophies - a.trophies;
+            if (b.finals !== a.finals) return b.finals - a.finals;
+            var sgA = a.goalsScored - a.goalsConceded;
+            var sgB = b.goalsScored - b.goalsConceded;
+            return sgB - sgA;
+        });
+
+        if (entries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhuma estatística disponível.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = entries.map(function (s, idx) {
+            var sg = s.goalsScored - s.goalsConceded;
+            return '<tr>' +
+                '<td>' + (idx + 1) + '</td>' +
+                '<td><strong>' + escapeHtml(s.nick) + '</strong></td>' +
+                '<td>' + s.trophies + '</td>' +
+                '<td>' + s.finals + '</td>' +
+                '<td>' + s.semis + '</td>' +
+                '<td>' + s.goalsScored + '</td>' +
+                '<td>' + s.goalsConceded + '</td>' +
+                '<td>' + (sg >= 0 ? '+' : '') + sg + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    /* ------------------------------------------------------------------
+       HISTORY
+    ------------------------------------------------------------------ */
+    function renderHistory(container) {
+        var history = Data.getHistory();
+        if (history.length === 0) {
+            container.innerHTML = '<p class="empty-state">Nenhum torneio encerrado ainda.</p>';
+            return;
+        }
+
+        container.innerHTML = history.map(function (h) {
+            var date = h.finishedAt ? new Date(h.finishedAt).toLocaleDateString('pt-BR') : '';
+            return '<div class="history-card">' +
+                '<span class="history-trophy">&#127942;</span>' +
+                '<div class="history-info">' +
+                '<div class="history-name">' + escapeHtml(h.name || 'Torneio') + '</div>' +
+                '<div class="history-winner">' + (h.winnerFlag || '') + ' Campeão: ' + escapeHtml(h.winner || 'N/A') + '</div>' +
+                '<div class="history-date">' + h.teamCount + ' times | ' + (h.prize || 'Sem premiação') + ' | ' + date + '</div>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+    }
+
+    /* ------------------------------------------------------------------
+       VISITOR VIEW
+    ------------------------------------------------------------------ */
+    function refreshVisitorView() {
+        var t = Data.getTournament();
+        renderBracketView(document.getElementById('visitor-bracket-container'), t, false);
+        renderStatsTable(document.getElementById('visitor-stats-body'));
+        renderHistory(document.getElementById('visitor-history-list'));
+    }
+
+    function setupVisitor() {
+        document.getElementById('btn-visitor-back').addEventListener('click', function () {
+            showScreen('screen-landing');
+        });
+    }
+
+    /* ------------------------------------------------------------------
+       Utilidades HTML
+    ------------------------------------------------------------------ */
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
         return div.innerHTML;
     }
 
-    /** Verifica se a URL é um link do YouTube */
-    function isYouTubeUrl(url) {
-        if (typeof url !== 'string') return false;
-        return /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|shorts\/)|youtu\.be\/)[\w-]+/.test(url);
-    }
-
-    /** Extrai o ID do vídeo do YouTube a partir da URL */
-    function getYouTubeVideoId(url) {
-        if (typeof url !== 'string') return null;
-        var match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{10,12})/);
-        return match ? match[1] : null;
-    }
-
-    // ======================================================================
-    // 4. GERENCIAMENTO DE STATUS
-    // ======================================================================
-    const STATUS_MAP = {
-        idle:        { text: 'Aguardando entrada...', attr: 'idle' },
-        connecting:  { text: 'Conectando peers...', attr: 'connecting' },
-        downloading: { text: 'Baixando...', attr: 'downloading' },
-        ready:       { text: 'Pronto para reprodução', attr: 'ready' },
-        completed:   { text: 'Concluído', attr: 'complete' },
-        error:       { text: 'Erro', attr: 'error' },
-    };
-
-    function setStatus(state, customText) {
-        const config = STATUS_MAP[state] || STATUS_MAP.idle;
-        if (DOM.statusDot) DOM.statusDot.setAttribute('data-status', config.attr);
-        if (DOM.statusText) DOM.statusText.textContent = customText || config.text;
-    }
-
-    // ======================================================================
-    // 5. LOG DE ATIVIDADE
-    // ======================================================================
-    const LOG_ICONS = {
-        info:    'info',
-        success: 'check-circle',
-        warning: 'alert-triangle',
-        error:   'x-circle',
-    };
-
-    function addLog(message, type) {
-        type = type || 'info';
-        if (!DOM.logList) return;
-
-        // Mostrar painel de log se estiver escondido
-        if (DOM.activityLog && DOM.activityLog.hidden) DOM.activityLog.hidden = false;
-
-        // Limitar entradas
-        while (DOM.logList.children.length >= MAX_LOG_ENTRIES) {
-            DOM.logList.removeChild(DOM.logList.firstChild);
-        }
-
-        const now = new Date();
-        const timestamp = [
-            now.getHours().toString().padStart(2, '0'),
-            now.getMinutes().toString().padStart(2, '0'),
-            now.getSeconds().toString().padStart(2, '0'),
-        ].join(':');
-
-        const li = document.createElement('li');
-        li.className = 'log-entry log-entry--' + type;
-        li.innerHTML =
-            '<i data-lucide="' + (LOG_ICONS[type] || 'info') + '" class="log-entry-icon" aria-hidden="true"></i>' +
-            '<span class="log-entry-time">' + timestamp + '</span>' +
-            '<span class="log-entry-message">' + escapeHtml(message) + '</span>';
-
-        DOM.logList.appendChild(li);
-
-        // Recriar ícones Lucide nos novos elementos
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [li] });
-
-        // Auto-scroll para a entrada mais recente
-        DOM.logList.scrollTop = DOM.logList.scrollHeight;
-    }
-
-    function clearLog() {
-        if (DOM.logList) DOM.logList.innerHTML = '';
-    }
-
-    // ======================================================================
-    // 6. MODAL DE DISCLAIMER
-    // ======================================================================
-    function initDisclaimer() {
-        const accepted = localStorage.getItem('psyzon-disclaimer-accepted');
-        if (accepted === 'true') {
-            if (DOM.disclaimerModal) DOM.disclaimerModal.hidden = true;
-            return;
-        }
-
-        // Mostrar modal
-        if (DOM.disclaimerModal) DOM.disclaimerModal.hidden = false;
-
-        if (DOM.btnAcceptDisclaimer) {
-            DOM.btnAcceptDisclaimer.addEventListener('click', function () {
-                localStorage.setItem('psyzon-disclaimer-accepted', 'true');
-                if (DOM.disclaimerModal) DOM.disclaimerModal.hidden = true;
-            });
-        }
-    }
-
-    // ======================================================================
-    // 7. VALIDACAO DE ENTRADA
-    // ======================================================================
-    function isValidMagnet(uri) {
-        return typeof uri === 'string' &&
-               uri.startsWith('magnet:?') &&
-               uri.includes('xt=urn:btih:');
-    }
-
-    function isValidTorrentFile(file) {
-        return file && file.name && file.name.toLowerCase().endsWith('.torrent');
-    }
-
-    // ======================================================================
-    // 8. MOTOR WEBTORRENT
-    // ======================================================================
-
-    /** Inicializa o cliente WebTorrent sob demanda */
-    function getClient() {
-        if (client) return client;
-        if (typeof WebTorrent === 'undefined') {
-            throw new Error('WebTorrent não está disponível. Verifique se o CDN foi carregado.');
-        }
-        client = new WebTorrent();
-        client.on('error', function (err) {
-            addLog('Erro no cliente WebTorrent: ' + err.message, 'error');
-            setStatus('error', 'Erro: ' + err.message);
-        });
-        return client;
-    }
-
-    /** Inicia o download/streaming de um torrent ou reproduz link do YouTube */
-    function startTorrent() {
-        const magnetUri = DOM.magnetInput ? DOM.magnetInput.value.trim() : '';
-        const torrentFile = DOM.torrentFileInput && DOM.torrentFileInput.files
-            ? DOM.torrentFileInput.files[0]
-            : null;
-
-        // Verificar se é um link do YouTube
-        if (magnetUri && isYouTubeUrl(magnetUri)) {
-            playYouTubeVideo(magnetUri);
-            return;
-        }
-
-        // Validar entrada
-        if (!magnetUri && !torrentFile) {
-            setStatus('error', 'Insira um magnet link, link do YouTube ou selecione um arquivo .torrent');
-            addLog('Nenhuma entrada fornecida. Insira um magnet link, link do YouTube ou arquivo .torrent.', 'warning');
-            return;
-        }
-
-        if (magnetUri && !isValidMagnet(magnetUri)) {
-            setStatus('error', 'Link inválido');
-            addLog('Formato inválido. Use um magnet link (magnet:?xt=urn:btih:...) ou um link do YouTube.', 'error');
-            return;
-        }
-
-        if (torrentFile && !isValidTorrentFile(torrentFile)) {
-            setStatus('error', 'Arquivo inválido');
-            addLog('Arquivo inválido. Selecione um arquivo com extensão .torrent.', 'error');
-            return;
-        }
-
-        const torrentSource = magnetUri || torrentFile;
-
-        try {
-            const wtClient = getClient();
-
-            // Destruir torrent anterior
-            if (currentTorrent) {
-                try {
-                    currentTorrent.destroy();
-                } catch (destroyErr) {
-                    addLog('Aviso ao destruir torrent anterior: ' + destroyErr.message, 'warning');
+    /* ------------------------------------------------------------------
+       Fechar modais ao clicar fora
+    ------------------------------------------------------------------ */
+    function setupModalBackdropClose() {
+        document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) {
+                    overlay.hidden = true;
                 }
-                currentTorrent = null;
-            }
-
-            setStatus('connecting');
-            addLog('Iniciando download...', 'info');
-
-            wtClient.add(torrentSource, function (torrent) {
-                currentTorrent = torrent;
-
-                torrent.on('metadata', function () {
-                    addLog('Metadados carregados com sucesso.', 'success');
-                });
-
-                // Torrent pronto
-                onTorrentReady(torrent);
-
-                torrent.on('warning', function (warn) {
-                    addLog('Aviso: ' + warn, 'warning');
-                });
-
-                torrent.on('error', function (err) {
-                    setStatus('error', 'Erro: ' + err.message);
-                    addLog('Erro no torrent: ' + err.message, 'error');
-                });
-
-                torrent.on('done', function () {
-                    setStatus('completed');
-                    addLog('Download concluído! Todos os arquivos foram baixados.', 'success');
-                    if (DOM.streamingBadge) DOM.streamingBadge.style.display = 'none';
-                    updateFileList(torrent);
-                });
             });
-        } catch (err) {
-            setStatus('error', err.message);
-            addLog('Erro ao iniciar: ' + err.message, 'error');
-        }
-    }
-
-    /** Callback quando o torrent está pronto */
-    function onTorrentReady(torrent) {
-        setStatus('downloading');
-        addLog('Torrent carregado: ' + torrent.name + ' (' + formatBytes(torrent.length) + ')', 'success');
-        addLog(torrent.files.length + ' arquivo(s) encontrado(s).', 'info');
-
-        if (DOM.mainContent) DOM.mainContent.hidden = false;
-        if (DOM.downloadPanel) DOM.downloadPanel.hidden = false;
-
-        renderFileList(torrent);
-        startStatsUpdater(torrent);
-    }
-
-    /** Reproduz um vídeo do YouTube no player embutido */
-    function playYouTubeVideo(url) {
-        var videoId = getYouTubeVideoId(url);
-        if (!videoId) {
-            setStatus('error', 'Link do YouTube inválido');
-            addLog('Não foi possível extrair o ID do vídeo do YouTube.', 'error');
-            return;
-        }
-
-        addLog('Link do YouTube detectado. Carregando vídeo...', 'info');
-        setStatus('ready', 'Reproduzindo YouTube');
-
-        if (DOM.mainContent) DOM.mainContent.hidden = false;
-
-        // Esconder overlay e o player HTML5
-        if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
-        if (DOM.videoPlayer) DOM.videoPlayer.style.display = 'none';
-
-        // Remover iframe anterior se existir
-        var container = DOM.videoContainer;
-        if (!container) return;
-        var oldIframe = container.querySelector('.youtube-iframe');
-        if (oldIframe) oldIframe.remove();
-
-        // Criar iframe do YouTube
-        var iframe = document.createElement('iframe');
-        iframe.className = 'youtube-iframe';
-        iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&rel=0';
-        iframe.setAttribute('allowfullscreen', '');
-        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-        iframe.setAttribute('aria-label', 'Player do YouTube');
-
-        container.insertBefore(iframe, container.firstChild);
-
-        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = 'YouTube: ' + url;
-        if (DOM.streamingBadge) DOM.streamingBadge.style.display = 'none';
-
-        addLog('Vídeo do YouTube carregado com sucesso.', 'success');
-    }
-
-    // ======================================================================
-    // 9. LISTA DE ARQUIVOS
-    // ======================================================================
-
-    function renderFileList(torrent) {
-        if (!DOM.fileList) return;
-        DOM.fileList.innerHTML = '';
-
-        torrent.files.forEach(function (file, index) {
-            const isVideo = isVideoFile(file.name);
-            const iconName = getFileIcon(file.name);
-
-            const li = document.createElement('li');
-            li.className = 'file-item';
-            li.dataset.fileIndex = index;
-
-            li.innerHTML =
-                '<div class="file-item-icon">' +
-                    '<i data-lucide="' + iconName + '"></i>' +
-                '</div>' +
-                '<div class="file-item-info">' +
-                    '<span class="file-item-name" title="' + escapeHtml(file.name) + '">' + escapeHtml(file.name) + '</span>' +
-                    '<span class="file-item-size">' + formatBytes(file.length) + '</span>' +
-                    '<div class="file-item-progress">' +
-                        '<div class="file-item-progress-bar" data-progress="0"></div>' +
-                    '</div>' +
-                    '<span class="file-item-percent">0%</span>' +
-                '</div>' +
-                '<div class="file-item-actions">' +
-                    (isVideo
-                        ? '<button class="btn btn-sm btn-play" data-file-index="' + index + '" aria-label="Reproduzir ' + escapeHtml(file.name) + '">' +
-                              '<i data-lucide="play"></i> Reproduzir' +
-                          '</button>'
-                        : '') +
-                    '<button class="btn btn-sm btn-download" data-file-index="' + index + '" aria-label="Baixar ' + escapeHtml(file.name) + '">' +
-                        '<i data-lucide="download"></i> Baixar' +
-                    '</button>' +
-                    '<span class="badge badge-ready" hidden>Pronto</span>' +
-                '</div>';
-
-            // Evento de clique no botao reproduzir
-            const playBtn = li.querySelector('.btn-play');
-            if (playBtn) {
-                playBtn.addEventListener('click', function () {
-                    playVideoFile(torrent, index);
-                });
-            }
-
-            // Evento de clique no botão baixar
-            var downloadBtn = li.querySelector('.btn-download');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function () {
-                    downloadFile(torrent, index);
-                });
-            }
-
-            DOM.fileList.appendChild(li);
-        });
-
-        // Recriar ícones Lucide
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [DOM.fileList] });
-
-        // Iniciar atualizacao de progresso individual
-        startFileProgressUpdater(torrent);
-    }
-
-    /** Atualiza o progresso individual de cada arquivo */
-    function updateFileList(torrent) {
-        if (!DOM.fileList || !torrent || !torrent.files) return;
-
-        torrent.files.forEach(function (file, index) {
-            const li = DOM.fileList.querySelector('[data-file-index="' + index + '"]');
-            if (!li) return;
-
-            const progress = file.progress;
-            const pct = (progress * 100).toFixed(0);
-            const progressBarEl = li.querySelector('.file-item-progress-bar');
-            const percentEl = li.querySelector('.file-item-percent');
-            const readyBadge = li.querySelector('.badge-ready');
-
-            if (progressBarEl) {
-                progressBarEl.style.width = pct + '%';
-                progressBarEl.dataset.progress = pct;
-            }
-            if (percentEl) percentEl.textContent = pct + '%';
-
-            if (progress >= 1 && readyBadge) readyBadge.hidden = false;
         });
     }
 
-    function startFileProgressUpdater(torrent) {
-        if (fileProgressInterval) clearInterval(fileProgressInterval);
-        fileProgressInterval = setInterval(function () {
-            updateFileList(torrent);
-        }, 1000);
-    }
-
-    // ======================================================================
-    // 10. PLAYER DE VIDEO E DOWNLOAD DE ARQUIVOS
-    // ======================================================================
-
-    /** Baixa qualquer arquivo do torrent */
-    function downloadFile(torrent, fileIndex) {
-        var file = torrent.files[fileIndex];
-        if (!file) {
-            addLog('Arquivo não encontrado.', 'error');
-            return;
-        }
-
-        addLog('Preparando download: ' + file.name + '...', 'info');
-
-        try {
-            file.getBlobURL(function (err, url) {
-                if (err) {
-                    addLog('Erro ao preparar download: ' + err.message, 'error');
-                    return;
-                }
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                addLog('Download iniciado: ' + file.name, 'success');
-            });
-        } catch (err) {
-            addLog('Erro ao baixar arquivo: ' + err.message, 'error');
-        }
-    }
-
-    /** Reproduz um arquivo de vídeo do torrent */
-    function playVideoFile(torrent, fileIndex) {
-        const file = torrent.files[fileIndex];
-        if (!file) {
-            addLog('Arquivo não encontrado.', 'error');
-            return;
-        }
-
-        currentFile = file;
-        const video = DOM.videoPlayer;
-        if (!video) return;
-
-        // Priorizar download das peças deste arquivo
-        try {
-            file.select();
-        } catch (selectErr) {
-            addLog('Aviso na priorização de peças: ' + selectErr.message, 'warning');
-        }
-
-        // Esconder overlay, mostrar player (remover iframe do YouTube se existir)
-        if (DOM.playerOverlay) DOM.playerOverlay.style.display = 'none';
-        video.style.display = '';
-        if (DOM.videoContainer) {
-            var ytIframe = DOM.videoContainer.querySelector('.youtube-iframe');
-            if (ytIframe) ytIframe.remove();
-        }
-        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = file.name;
-
-        // Badge de streaming se não está 100% baixado
-        if (DOM.streamingBadge) {
-            DOM.streamingBadge.style.display = file.progress < 1 ? '' : 'none';
-        }
-
-        addLog('Reprodução iniciada: ' + file.name, 'info');
-        setStatus('ready');
-
-        const ext = '.' + file.name.split('.').pop().toLowerCase();
-
-        // Limpar src anterior
-        video.pause();
-        video.removeAttribute('src');
-        video.load();
-
-        // Para .mp4 e .webm — usar renderTo com MediaSource
-        if (ext === '.mp4' || ext === '.webm') {
-            try {
-                file.renderTo(video, { autoplay: true }, function (err) {
-                    if (err) {
-                        addLog('Erro ao reproduzir com renderTo: ' + err.message + '. Tentando método alternativo...', 'warning');
-                        fallbackBlobPlayback(file, video);
-                    }
-                });
-            } catch (err) {
-                addLog('Erro ao reproduzir: ' + err.message, 'error');
-                fallbackBlobPlayback(file, video);
-            }
-        } else {
-            fallbackBlobPlayback(file, video);
-        }
-
-        startPlayerUpdateLoop();
-    }
-
-    /** Reproducao via Blob URL como fallback */
-    function fallbackBlobPlayback(file, video) {
-        try {
-            file.getBlobURL(function (err, url) {
-                if (err) {
-                    addLog('Erro ao gerar URL do arquivo: ' + err.message, 'error');
-                    addLog('Este formato pode não ser suportado pelo navegador.', 'warning');
-                    return;
-                }
-                video.src = url;
-                video.play().catch(function (playErr) {
-                    addLog('Codec não suportado pelo navegador: ' + playErr.message, 'error');
-                });
-            });
-        } catch (err) {
-            addLog('Erro ao reproduzir arquivo: ' + err.message, 'error');
-        }
-    }
-
-    // ======================================================================
-    // 11. CONTROLES CUSTOMIZADOS DO PLAYER
-    // ======================================================================
-
-    function initPlayerControls() {
-        const video = DOM.videoPlayer;
-        if (!video) return;
-
-        // Play / Pause
-        if (DOM.btnPlayPause) DOM.btnPlayPause.addEventListener('click', togglePlayPause);
-
-        // Retroceder 10s
-        if (DOM.btnRewind) {
-            DOM.btnRewind.addEventListener('click', function () {
-                if (video.readyState > 0) video.currentTime = Math.max(0, video.currentTime - 10);
-            });
-        }
-
-        // Avancar 10s
-        if (DOM.btnForward) {
-            DOM.btnForward.addEventListener('click', function () {
-                if (video.readyState > 0) video.currentTime = Math.min(video.duration, video.currentTime + 10);
-            });
-        }
-
-        // Barra de progresso — clique e arraste
-        if (DOM.progressContainer) {
-            DOM.progressContainer.addEventListener('mousedown', onProgressMouseDown);
-            DOM.progressContainer.addEventListener('touchstart', onProgressTouchStart, { passive: false });
-        }
-
-        // Volume — mute/unmute
-        if (DOM.btnVolume) DOM.btnVolume.addEventListener('click', toggleMute);
-
-        // Volume — slider
-        if (DOM.volumeSlider) {
-            DOM.volumeSlider.addEventListener('input', function (e) {
-                video.volume = parseFloat(e.target.value);
-                video.muted = video.volume === 0;
-                updateVolumeIcon();
-            });
-        }
-
-        // Velocidade de reprodução
-        if (DOM.speedSelector) {
-            DOM.speedSelector.addEventListener('change', function (e) {
-                video.playbackRate = parseFloat(e.target.value);
-            });
-        }
-
-        // Tela cheia
-        if (DOM.btnFullscreen) DOM.btnFullscreen.addEventListener('click', toggleFullscreen);
-
-        // Eventos do video
-        video.addEventListener('play', function () { updatePlayPauseIcon(true); });
-        video.addEventListener('pause', function () { updatePlayPauseIcon(false); });
-        video.addEventListener('timeupdate', onTimeUpdate);
-        video.addEventListener('waiting', function () {
-            if (DOM.bufferingOverlay) DOM.bufferingOverlay.hidden = false;
-        });
-        video.addEventListener('playing', function () {
-            if (DOM.bufferingOverlay) DOM.bufferingOverlay.hidden = true;
-        });
-        video.addEventListener('ended', function () {
-            updatePlayPauseIcon(false);
-            addLog('Reprodução encerrada.', 'info');
-        });
-        video.addEventListener('error', function () {
-            const errorMsg = video.error ? video.error.message : 'Erro desconhecido';
-            addLog('Erro no player: ' + errorMsg + '. O codec pode não ser compatível com este navegador.', 'error');
-        });
-        video.addEventListener('loadedmetadata', function () {
-            if (DOM.duration) DOM.duration.textContent = formatTime(video.duration);
-        });
-        video.addEventListener('progress', updateBufferVisualization);
-
-        // Atalhos de teclado
-        document.addEventListener('keydown', onKeyboardShortcut);
-    }
-
-    function togglePlayPause() {
-        const video = DOM.videoPlayer;
-        if (!video || !video.src) return;
-        if (video.paused) {
-            video.play().catch(function () {});
-        } else {
-            video.pause();
-        }
-    }
-
-    function updatePlayPauseIcon(isPlaying) {
-        const btn = DOM.btnPlayPause;
-        if (!btn) return;
-        const iconName = isPlaying ? 'pause' : 'play';
-        btn.innerHTML = '<i data-lucide="' + iconName + '" aria-hidden="true"></i>';
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
-    }
-
-    function toggleMute() {
-        const video = DOM.videoPlayer;
-        if (!video) return;
-        video.muted = !video.muted;
-        if (DOM.volumeSlider) DOM.volumeSlider.value = video.muted ? 0 : video.volume;
-        updateVolumeIcon();
-    }
-
-    function updateVolumeIcon() {
-        const video = DOM.videoPlayer;
-        const btn = DOM.btnVolume;
-        if (!video || !btn) return;
-        let iconName = 'volume-2';
-        if (video.muted || video.volume === 0) {
-            iconName = 'volume-x';
-        } else if (video.volume < 0.5) {
-            iconName = 'volume-1';
-        }
-        btn.innerHTML = '<i data-lucide="' + iconName + '" aria-hidden="true"></i>';
-        if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [btn] });
-    }
-
-    function toggleFullscreen() {
-        const container = DOM.videoContainer;
-        if (!container) return;
-        if (document.fullscreenElement) {
-            document.exitFullscreen().catch(function () {});
-        } else {
-            container.requestFullscreen().catch(function () {});
-        }
-    }
-
-    function onTimeUpdate() {
-        const video = DOM.videoPlayer;
-        if (!video || isDraggingProgress) return;
-        if (DOM.currentTime) DOM.currentTime.textContent = formatTime(video.currentTime);
-        updateProgressBarPosition();
-    }
-
-    function updateProgressBarPosition() {
-        const video = DOM.videoPlayer;
-        if (!video || !video.duration) return;
-        const pct = (video.currentTime / video.duration) * 100;
-        if (DOM.progressBar) DOM.progressBar.style.width = pct + '%';
-        if (DOM.progressHandle) DOM.progressHandle.style.left = pct + '%';
-    }
-
-    function updateBufferVisualization() {
-        const video = DOM.videoPlayer;
-        if (!video || !video.duration) return;
-
-        // Usar buffered ranges do HTML5 video
-        if (video.buffered.length > 0) {
-            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-            const pct = (bufferedEnd / video.duration) * 100;
-            if (DOM.progressBuffer) DOM.progressBuffer.style.width = pct + '%';
-        }
-
-        // Complementar com progresso do WebTorrent
-        if (currentFile && DOM.progressBuffer) {
-            const filePct = (currentFile.progress || 0) * 100;
-            const currentPct = parseFloat(DOM.progressBuffer.style.width) || 0;
-            if (filePct > currentPct) {
-                DOM.progressBuffer.style.width = filePct + '%';
-            }
-        }
-    }
-
-    // Arraste na barra de progresso (mouse)
-    function onProgressMouseDown(e) {
-        e.preventDefault();
-        isDraggingProgress = true;
-        seekToPosition(e);
-        document.addEventListener('mousemove', onProgressMouseMove);
-        document.addEventListener('mouseup', onProgressMouseUp);
-    }
-
-    function onProgressMouseMove(e) {
-        if (isDraggingProgress) seekToPosition(e);
-    }
-
-    function onProgressMouseUp() {
-        isDraggingProgress = false;
-        document.removeEventListener('mousemove', onProgressMouseMove);
-        document.removeEventListener('mouseup', onProgressMouseUp);
-    }
-
-    // Arraste na barra de progresso (touch)
-    function onProgressTouchStart(e) {
-        e.preventDefault();
-        isDraggingProgress = true;
-        seekToPosition(e.touches[0]);
-        document.addEventListener('touchmove', onProgressTouchMove, { passive: false });
-        document.addEventListener('touchend', onProgressTouchEnd);
-    }
-
-    function onProgressTouchMove(e) {
-        e.preventDefault();
-        if (isDraggingProgress) seekToPosition(e.touches[0]);
-    }
-
-    function onProgressTouchEnd() {
-        isDraggingProgress = false;
-        document.removeEventListener('touchmove', onProgressTouchMove);
-        document.removeEventListener('touchend', onProgressTouchEnd);
-    }
-
-    function seekToPosition(e) {
-        const video = DOM.videoPlayer;
-        const container = DOM.progressContainer;
-        if (!video || !container || !video.duration) return;
-
-        const rect = container.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const pct = x / rect.width;
-        video.currentTime = pct * video.duration;
-        if (DOM.currentTime) DOM.currentTime.textContent = formatTime(video.currentTime);
-        updateProgressBarPosition();
-    }
-
-    // Atalhos de teclado
-    function onKeyboardShortcut(e) {
-        // Não capturar em campos de entrada
-        const tag = e.target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-
-        const video = DOM.videoPlayer;
-        if (!video) return;
-
-        switch (e.key.toLowerCase()) {
-            case ' ':
-                e.preventDefault();
-                togglePlayPause();
-                break;
-            case 'arrowleft':
-                e.preventDefault();
-                if (video.readyState > 0) video.currentTime = Math.max(0, video.currentTime - 10);
-                break;
-            case 'arrowright':
-                e.preventDefault();
-                if (video.readyState > 0) video.currentTime = Math.min(video.duration, video.currentTime + 10);
-                break;
-            case 'm':
-                toggleMute();
-                break;
-            case 'f':
-                toggleFullscreen();
-                break;
-        }
-    }
-
-    /** Loop de atualização visual do player via requestAnimationFrame */
-    function startPlayerUpdateLoop() {
-        if (animFrameId) cancelAnimationFrame(animFrameId);
-        function loop() {
-            if (!isDraggingProgress) {
-                updateProgressBarPosition();
-                updateBufferVisualization();
-            }
-            animFrameId = requestAnimationFrame(loop);
-        }
-        animFrameId = requestAnimationFrame(loop);
-    }
-
-    // ======================================================================
-    // 12. ATUALIZACAO DE ESTATISTICAS DE DOWNLOAD
-    // ======================================================================
-
-    function startStatsUpdater(torrent) {
-        if (statsInterval) clearInterval(statsInterval);
-
-        function update() {
-            if (!torrent) return;
-            const progress = (torrent.progress * 100).toFixed(1);
-
-            if (DOM.overallProgressText) DOM.overallProgressText.textContent = progress + '%';
-            if (DOM.overallProgressBar) DOM.overallProgressBar.style.width = progress + '%';
-            if (DOM.downloadSpeed) DOM.downloadSpeed.textContent = formatSpeed(torrent.downloadSpeed);
-            if (DOM.uploadSpeed) DOM.uploadSpeed.textContent = formatSpeed(torrent.uploadSpeed);
-            if (DOM.peersCount) DOM.peersCount.textContent = torrent.numPeers;
-            if (DOM.totalSize) DOM.totalSize.textContent = formatBytes(torrent.length);
-            if (DOM.downloadedSize) DOM.downloadedSize.textContent = formatBytes(torrent.downloaded);
-            if (DOM.timeRemaining) DOM.timeRemaining.textContent = formatETA(torrent.timeRemaining);
-
-            if (DOM.torrentStatus) {
-                if (torrent.progress >= 1) {
-                    DOM.torrentStatus.textContent = 'Concluído - Fazendo seed';
-                } else if (torrent.numPeers > 0) {
-                    DOM.torrentStatus.textContent = 'Baixando de ' + torrent.numPeers + ' peer(s)';
-                } else {
-                    DOM.torrentStatus.textContent = 'Procurando peers...';
-                }
-            }
-        }
-
-        update();
-        statsInterval = setInterval(update, 1000);
-    }
-
-    function stopStatsUpdater() {
-        if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
-        if (fileProgressInterval) { clearInterval(fileProgressInterval); fileProgressInterval = null; }
-    }
-
-    // ======================================================================
-    // 13. ACOES DA INTERFACE
-    // ======================================================================
-
-    function initInputHandlers() {
-        if (DOM.btnStart) DOM.btnStart.addEventListener('click', startTorrent);
-        if (DOM.btnClear) DOM.btnClear.addEventListener('click', clearAll);
-
-        // Mostrar nome do arquivo selecionado no label
-        if (DOM.torrentFileInput) {
-            DOM.torrentFileInput.addEventListener('change', function () {
-                const file = DOM.torrentFileInput.files ? DOM.torrentFileInput.files[0] : null;
-                if (file && DOM.torrentFileLabel) DOM.torrentFileLabel.textContent = file.name;
-            });
-        }
-
-        if (DOM.btnClearLog) DOM.btnClearLog.addEventListener('click', clearLog);
-
-        // Enter no campo de magnet link
-        if (DOM.magnetInput) {
-            DOM.magnetInput.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') { e.preventDefault(); startTorrent(); }
-            });
-        }
-    }
-
-    /** Limpa toda a interface e destrói torrents */
-    function clearAll() {
-        // Destruir torrents ativos
-        if (client) {
-            try {
-                client.torrents.forEach(function (t) { t.destroy(); });
-            } catch (err) {
-                console.warn('Erro ao destruir torrents:', err);
-            }
-        }
-        currentTorrent = null;
-        currentFile = null;
-
-        stopStatsUpdater();
-        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-
-        // Limpar entradas
-        if (DOM.magnetInput) DOM.magnetInput.value = '';
-        if (DOM.torrentFileInput) DOM.torrentFileInput.value = '';
-        if (DOM.torrentFileLabel) DOM.torrentFileLabel.textContent = '.torrent';
-
-        // Resetar player
-        const video = DOM.videoPlayer;
-        if (video) {
-            video.pause();
-            video.removeAttribute('src');
-            video.load();
-            video.style.display = '';
-        }
-        // Remover iframe do YouTube se existir
-        if (DOM.videoContainer) {
-            var ytIframe = DOM.videoContainer.querySelector('.youtube-iframe');
-            if (ytIframe) ytIframe.remove();
-        }
-        if (DOM.playerOverlay) DOM.playerOverlay.style.display = '';
-        if (DOM.bufferingOverlay) DOM.bufferingOverlay.hidden = true;
-        if (DOM.nowPlayingName) DOM.nowPlayingName.textContent = 'Nenhum vídeo selecionado';
-        if (DOM.streamingBadge) DOM.streamingBadge.style.display = '';
-        if (DOM.currentTime) DOM.currentTime.textContent = '0:00';
-        if (DOM.duration) DOM.duration.textContent = '0:00';
-        if (DOM.progressBar) DOM.progressBar.style.width = '0%';
-        if (DOM.progressBuffer) DOM.progressBuffer.style.width = '0%';
-        if (DOM.progressHandle) DOM.progressHandle.style.left = '0%';
-        updatePlayPauseIcon(false);
-
-        // Esconder paineis
-        if (DOM.mainContent) DOM.mainContent.hidden = true;
-        if (DOM.downloadPanel) DOM.downloadPanel.hidden = true;
-        if (DOM.activityLog) DOM.activityLog.hidden = true;
-
-        // Limpar lista de arquivos
-        if (DOM.fileList) DOM.fileList.innerHTML = '';
-
-        // Resetar stats
-        if (DOM.overallProgressText) DOM.overallProgressText.textContent = '0%';
-        if (DOM.overallProgressBar) DOM.overallProgressBar.style.width = '0%';
-        if (DOM.downloadSpeed) DOM.downloadSpeed.textContent = '0 KB/s';
-        if (DOM.uploadSpeed) DOM.uploadSpeed.textContent = '0 KB/s';
-        if (DOM.peersCount) DOM.peersCount.textContent = '0';
-        if (DOM.totalSize) DOM.totalSize.textContent = '0 MB';
-        if (DOM.downloadedSize) DOM.downloadedSize.textContent = '0 MB';
-        if (DOM.timeRemaining) DOM.timeRemaining.textContent = 'Calculando...';
-        if (DOM.torrentStatus) DOM.torrentStatus.textContent = 'Verificação de peças';
-
-        setStatus('idle');
-        clearLog();
-        addLog('Interface limpa. Pronto para novo torrent.', 'info');
-    }
-
-    // ======================================================================
-    // 14. LIMPEZA DE RECURSOS
-    // ======================================================================
-
-    function initCleanup() {
-        window.addEventListener('beforeunload', function () {
-            stopStatsUpdater();
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            if (client) {
-                try { client.destroy(); } catch (_) { /* silencioso */ }
-                client = null;
-            }
-        });
-    }
-
-    // ======================================================================
-    // 15. INICIALIZACAO
-    // ======================================================================
-
+    /* ------------------------------------------------------------------
+       INICIALIZACAO
+    ------------------------------------------------------------------ */
     function init() {
-        initDisclaimer();
-        initPlayerControls();
-        initInputHandlers();
-        initCleanup();
-        setStatus('idle');
-        addLog('Psyzon Stream inicializado. Aguardando entrada...', 'info');
+        setupTabs();
+        setupLanding();
+        setupRoomCode();
+        setupRegistration();
+        setupOrganizer();
+        setupPlayersModal();
+        setupResultModal();
+        setupVisitor();
+        setupParticipantView();
+        setupCPFMasks();
+        setupPhoneMask();
+        setupModalBackdropClose();
     }
 
+    // Executar quando DOM estiver pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
-
 })();
